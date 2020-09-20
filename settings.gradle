@@ -1,3 +1,3 @@
 include ':example'
-rootProject.name='redux-kotlin-android-toolkit'
+rootProject.name='redux-kotlin-android'
 include ':lib'
