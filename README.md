@@ -1,3 +1,4 @@
+[![](https://jitpack.io/v/carterhudson/redux-kotlin-android.svg)](https://jitpack.io/#carterhudson/redux-kotlin-android)
 
 ### Tools for working with [redux-kotlin](https://github.com/reduxkotlin/redux-kotlin) in an Android environment.
 
