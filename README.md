@@ -2,8 +2,7 @@
 [![](https://jitpack.io/v/carterhudson/redux-kotlin-android.svg)](https://jitpack.io/#carterhudson/redux-kotlin-android)
 
 # Getting Started
-This library provides a ready-made framework for working with Redux in a Kotlin Android environment. Getting off the ground is relatively easy, given you know the basics of Redux or another transactional state management framework. It provides two main entry points: `ReduxActivity` and `ReduxFragment`.
-Getting off the ground is relatively easy, given you know the basics of Redux or another transactional state management framework. For example:
+This library provides a ready-made framework for working with Redux in a Kotlin Android environment. Getting off the ground is relatively easy, given that you are familiar with Redux or transactional state management. It provides two main entry points: `ReduxActivity` and `ReduxFragment`:
 ```kotlin
 class MainActivity : ReduxActivity<AppState, CounterState>() {  
   
