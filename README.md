@@ -84,6 +84,8 @@ Traditionally, Redux uses different varieties of Middleware (thunk, saga, promis
 
 For those reasons, the default `Store` instance provided by this library is enhanced via Redux Store Enhancer to allow post-dispatch operations. You can subscribe to the current state + the action returned by the `dispatch()` function. `ReduxFragment` and `ReduxActivity` provide `performSideEffect(state, action)` for you to override. You're free to abstract away your async operations in whatever manner you please. Subscriptions to state & side effects are also lifecycle sensitive, and are auto-paused / resumed / canceled.
 
+
+## License
 ```
    Copyright 2020 Carter Hudson
 
