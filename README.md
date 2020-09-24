@@ -57,14 +57,15 @@ class CounterViewComponent(
   
   override val binding: CounterLayoutBinding =  
     CounterLayoutBinding.inflate(inflater, container, false).apply {  
-  incrementButton.setOnClickListener {  
-  dispatch(Increment())  
+      incrementButton.setOnClickListener {  
+        dispatch(Increment())
       }  
   
-  decrementButton.setOnClickListener {  
-  dispatch(Decrement())  
+      decrementButton.setOnClickListener {  
+        dispatch(Decrement())  
       }  
- }  
+    }  
+    
   override fun render(state: CounterState) {  
     binding.counterTextView.text = state.count.toString()  
   }  
