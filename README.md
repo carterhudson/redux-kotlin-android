@@ -1,9 +1,6 @@
 ### Tools for working with [redux-kotlin](https://github.com/reduxkotlin/redux-kotlin) in an Android environment.
 [![](https://jitpack.io/v/carterhudson/redux-kotlin-android.svg)](https://jitpack.io/#carterhudson/redux-kotlin-android)
 
-# Examples
-An example application is provided [here](https://github.com/carterhudson/redux-kotlin-android/tree/master/example).
-
 # Quick Start
 This library provides a ready-made framework for working with Redux in a Kotlin Android environment. Getting off the ground is relatively easy, given you know the basics of Redux or another transactional state management framework. It provides two main entry points: `ReduxActivity` and `ReduxFragment`.
 Getting off the ground is relatively easy, given you know the basics of Redux or another transactional state management framework. For example:
@@ -84,6 +81,8 @@ Traditionally, Redux uses different varieties of Middleware (thunk, saga, promis
 
 For those reasons, the default `Store` instance provided by this library is enhanced via Redux Store Enhancer to allow post-dispatch operations. You can subscribe to the current state + the action returned by the `dispatch()` function. `ReduxFragment` and `ReduxActivity` provide `performSideEffect(state, action)` for you to override. You're free to abstract away your async operations in whatever manner you please. Subscriptions to state & side effects are also lifecycle sensitive, and are auto-paused / resumed / canceled.
 
+# Examples
+An example application is provided [here](https://github.com/carterhudson/redux-kotlin-android/tree/master/example).
 
 ## License
 ```
