@@ -28,15 +28,15 @@ abstract class ReduxFragment<StateT : State, ComponentStateT : State> : Fragment
     super.onCreate(savedInstanceState)
 
     provideViewModel {
-      onProvideViewModel().also { reduxViewModel = it }
+      onCreateViewModel().also { reduxViewModel = it }
     }
+
+    onViewModelCreated(reduxViewModel)
   }
 
-  abstract fun onProvideViewModel(): ReduxViewModel<StateT>
+  abstract fun onCreateViewModel(): ReduxViewModel<StateT>
 
-  fun getViewComponent() = viewComponent
-
-  fun getViewModel() = reduxViewModel
+  abstract fun onViewModelCreated(viewModel: ReduxViewModel<StateT>)
 
   /**
    * Overridden from [Fragment.onCreateView].
@@ -52,6 +52,7 @@ abstract class ReduxFragment<StateT : State, ComponentStateT : State> : Fragment
   ): View? = onCreateViewComponent(inflater, container, savedInstanceState)
     .also { viewComponent = it }
     .also { reduxViewModel.dispatch(LifecycleAction.CreatingView(this)) }
+    .also { onViewComponentCreated(viewComponent) }
     .root()
 
   /**
@@ -69,6 +70,8 @@ abstract class ReduxFragment<StateT : State, ComponentStateT : State> : Fragment
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): ViewComponent<ComponentStateT>
+
+  abstract fun onViewComponentCreated(viewComponent: ViewComponent<ComponentStateT>)
 
   /**
    * Overridden from [Fragment.onViewCreated]
