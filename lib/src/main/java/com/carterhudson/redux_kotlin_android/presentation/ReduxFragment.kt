@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.carterhudson.redux_kotlin_android.util.ManagedSubscription
 import com.carterhudson.redux_kotlin_android.util.State
-import com.carterhudson.redux_kotlin_android.util.StateSelector
 import com.carterhudson.redux_kotlin_android.util.addAll
 import com.carterhudson.redux_kotlin_android.util.cancel
 import com.carterhudson.redux_kotlin_android.util.lifecycle.LifecycleAction
@@ -18,7 +17,6 @@ import com.carterhudson.redux_kotlin_android.util.resume
 abstract class ReduxFragment<StateT : State, ComponentStateT : State> : Fragment() {
 
   private lateinit var viewModel: ReduxViewModel<StateT>
-  private lateinit var stateSelector: StateSelector<StateT, ComponentStateT>
   private lateinit var viewComponent: ViewComponent<ComponentStateT>
   private var subscriptions = mutableListOf<ManagedSubscription>()
 
@@ -86,7 +84,7 @@ abstract class ReduxFragment<StateT : State, ComponentStateT : State> : Fragment
 
     with(viewModel) {
       subscriptions.addAll(
-        subscribe(viewComponent::render, distinct(), stateSelector),
+        subscribe(viewComponent::render, distinct(), ::onSelectState),
         subscribe(::performSideEffect)
       )
     }
@@ -112,6 +110,8 @@ abstract class ReduxFragment<StateT : State, ComponentStateT : State> : Fragment
   protected open fun performSideEffect(state: StateT, action: Any) {
     //optional
   }
+
+  abstract fun onSelectState(inState: StateT): ComponentStateT
 
   override fun onStart() {
     super.onStart()
