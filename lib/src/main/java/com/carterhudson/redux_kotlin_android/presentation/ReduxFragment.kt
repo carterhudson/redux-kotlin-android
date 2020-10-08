@@ -34,7 +34,9 @@ abstract class ReduxFragment<StateT : State, ComponentStateT : State> : Fragment
 
   abstract fun onCreateViewModel(): ReduxViewModel<StateT>
 
-  abstract fun onViewModelCreated(viewModel: ReduxViewModel<StateT>)
+  open fun onViewModelCreated(viewModel: ReduxViewModel<StateT>) {
+    //optional
+  }
 
   /**
    * Overridden from [Fragment.onCreateView].
@@ -69,7 +71,9 @@ abstract class ReduxFragment<StateT : State, ComponentStateT : State> : Fragment
     savedInstanceState: Bundle?
   ): ViewComponent<ComponentStateT>
 
-  abstract fun onViewComponentCreated(viewComponent: ViewComponent<ComponentStateT>)
+  open fun onViewComponentCreated(viewComponent: ViewComponent<ComponentStateT>) {
+    //optional
+  }
 
   /**
    * Overridden from [Fragment.onViewCreated]
