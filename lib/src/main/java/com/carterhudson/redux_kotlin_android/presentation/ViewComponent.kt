@@ -1,40 +1,27 @@
 package com.carterhudson.redux_kotlin_android.presentation
 
-import android.content.Context
-import androidx.annotation.ColorInt
-import androidx.annotation.ColorRes
-import androidx.annotation.StringRes
-import androidx.viewbinding.ViewBinding
+import android.view.View
 import com.carterhudson.redux_kotlin_android.util.Renderer
 import com.carterhudson.redux_kotlin_android.util.State
-import com.carterhudson.redux_kotlin_android.util.getColorCompat
 
+/**
+ * A class for managing UI.
+ * Receives [StateT] updates via [render]
+ *
+ * Note: Many View Components can be composed into a single root View Component per controller.
+ *
+ * @param StateT the state the [ViewComponent] will [render]
+ */
 abstract class ViewComponent<StateT : State> : Renderer<StateT> {
 
-  protected open val binding: ViewBinding? = null
+  abstract fun root() : View
 
-  fun root() = binding?.root
-
+  /**
+   * Function for receiving state & updating the UI
+   *
+   * @param state the current state the UI cares about
+   */
   override fun render(state: StateT) {
     //optional
   }
-
-  protected fun requireContext(): Context = binding?.requireContext()
-    ?: throw IllegalStateException("Binding has not been initialized; can't obtain context")
-
-  protected fun getString(resId: Int): String = requireContext().getString(resId)
-
-  fun ViewBinding.requireContext() =
-    root.context ?: throw IllegalStateException("$this is not attached to a context.")
-
-  fun ViewBinding.getString(
-    @StringRes
-    id: Int
-  ): String = this.requireContext().getString(id)
-
-  @ColorInt
-  fun getColorIntFromResource(
-    @ColorRes
-    id: Int
-  ): Int = requireContext().getColorCompat(id)
 }

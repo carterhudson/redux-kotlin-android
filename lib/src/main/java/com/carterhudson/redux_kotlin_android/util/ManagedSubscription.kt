@@ -1,6 +1,6 @@
 package com.carterhudson.redux_kotlin_android.util
 
-open class StoreManagerSubscription {
+open class ManagedSubscription {
 
   protected var canceled: Boolean = false
   protected var paused: Boolean = false

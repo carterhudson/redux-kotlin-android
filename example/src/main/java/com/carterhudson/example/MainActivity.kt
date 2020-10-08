@@ -10,19 +10,22 @@ import com.carterhudson.redux_kotlin_android.presentation.ViewComponent
 
 class MainActivity : ReduxActivity<AppState, CounterState>() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        ExampleApp.injector.inject(this)
-    }
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    ExampleApp.injector.inject(this)
+  }
 
-    override fun onCreateViewModel(): ReduxViewModel<AppState> = ExampleApp.injector.appViewModel()
+  override fun onCreateViewModel(): ReduxViewModel<AppState> = ExampleApp.injector.appViewModel()
 
-    override fun onCreateViewComponent(): ViewComponent<CounterState> =
-        CounterViewComponent(inflater = layoutInflater, dispatch = reduxViewModel.dispatch)
+  override fun onCreateViewComponent(): ViewComponent<CounterState> =
+    CounterViewComponent(inflater = layoutInflater, dispatch = reduxViewModel.dispatch)
 
-    override fun onSelectState(state: AppState): CounterState = state.counterState
+  override fun onSelectState(state: AppState): CounterState = state.counterState
 
-    override fun performSideEffect(state: AppState, action: Any) {
-        Toast.makeText(this, "Side effect triggered for $action!", Toast.LENGTH_SHORT).show()
-    }
+  override fun performSideEffect(
+      state: AppState,
+      action: Any
+  ) {
+    Toast.makeText(this, "Side effect triggered for $action!", Toast.LENGTH_SHORT).show()
+  }
 }

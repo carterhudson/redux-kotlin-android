@@ -23,7 +23,7 @@ val addToDoItem = reducerForActionType<ToDoState, Add> { state, action ->
 
 val toDoStateReducer =
   combineReducers(
-    removeToDoItem,
-    addToDoItem,
-    nothingToDoReducer,
+      removeToDoItem,
+      addToDoItem,
+      nothingToDoReducer,
   )

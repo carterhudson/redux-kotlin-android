@@ -13,7 +13,7 @@ data class StateObserver<StateT : State, SlicedStateT : State>(
   private val handler: (SlicedStateT) -> Unit,
   private val distinct: Boolean,
   private val selector: (StateT) -> SlicedStateT,
-  private val sub: StoreManagerSubscription
+  private val sub: ManagedSubscription
 ) {
 
   private var prevState: SlicedStateT? = null

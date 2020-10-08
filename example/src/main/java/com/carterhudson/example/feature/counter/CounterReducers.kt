@@ -5,7 +5,6 @@ import com.carterhudson.example.feature.counter.CounterAction.Increment
 import org.reduxkotlin.combineReducers
 import org.reduxkotlin.reducerForActionType
 
-
 val nothingCounterReducer =
   reducerForActionType<CounterState, CounterAction> { state, action -> state }
 
@@ -19,7 +18,7 @@ val decrementCount = reducerForActionType<CounterState, Decrement> { state, acti
 
 val counterStateReducer =
   combineReducers(
-    incrementCount,
-    decrementCount,
-    nothingCounterReducer,
+      incrementCount,
+      decrementCount,
+      nothingCounterReducer,
   )

@@ -9,5 +9,5 @@ import dagger.Component
 interface ApplicationComponent {
   fun inject(mainActivity: MainActivity)
 
-  fun appViewModel() : ReduxViewModel<AppState>
+  fun appViewModel(): ReduxViewModel<AppState>
 }
