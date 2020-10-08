@@ -17,21 +17,21 @@ import com.carterhudson.redux_kotlin_android.util.resume
 
 abstract class ReduxFragment<StateT : State, ComponentStateT : State> : Fragment() {
 
-  private lateinit var reduxViewModel: ReduxViewModel<StateT>
+  private lateinit var viewModel: ReduxViewModel<StateT>
   private lateinit var stateSelector: StateSelector<StateT, ComponentStateT>
   private lateinit var viewComponent: ViewComponent<ComponentStateT>
   private var subscriptions = mutableListOf<ManagedSubscription>()
 
-  val dispatch = reduxViewModel.dispatch
+  val dispatch by lazy { viewModel.dispatch }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
     provideViewModel {
-      onCreateViewModel().also { reduxViewModel = it }
+      onCreateViewModel().also { viewModel = it }
     }
 
-    onViewModelCreated(reduxViewModel)
+    onViewModelCreated(viewModel)
   }
 
   abstract fun onCreateViewModel(): ReduxViewModel<StateT>
@@ -51,7 +51,7 @@ abstract class ReduxFragment<StateT : State, ComponentStateT : State> : Fragment
     savedInstanceState: Bundle?
   ): View? = onCreateViewComponent(inflater, container, savedInstanceState)
     .also { viewComponent = it }
-    .also { reduxViewModel.dispatch(LifecycleAction.CreatingView(this)) }
+    .also { viewModel.dispatch(LifecycleAction.CreatingView(this)) }
     .also { onViewComponentCreated(viewComponent) }
     .root()
 
@@ -84,7 +84,7 @@ abstract class ReduxFragment<StateT : State, ComponentStateT : State> : Fragment
   ) {
     super.onViewCreated(view, savedInstanceState)
 
-    with(reduxViewModel) {
+    with(viewModel) {
       subscriptions.addAll(
         subscribe(viewComponent::render, distinct(), stateSelector),
         subscribe(::performSideEffect)
