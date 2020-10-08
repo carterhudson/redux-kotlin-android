@@ -13,11 +13,13 @@ import com.carterhudson.redux_kotlin_android.util.resume
 
 abstract class ReduxActivity<StateT : State, ComponentStateT : State> : AppCompatActivity() {
 
-  protected lateinit var reduxViewModel: ReduxViewModel<StateT>
-
+  private lateinit var reduxViewModel: ReduxViewModel<StateT>
   private lateinit var viewComponent: ViewComponent<ComponentStateT>
-
   private val managedSubs = mutableListOf<ManagedSubscription>()
+
+  fun getViewComponent() = viewComponent
+
+  fun getViewModel() = reduxViewModel
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)

@@ -19,9 +19,10 @@ abstract class ReduxFragment<StateT : State, ComponentStateT : State> : Fragment
 
   private lateinit var reduxViewModel: ReduxViewModel<StateT>
   private lateinit var stateSelector: StateSelector<StateT, ComponentStateT>
+  private lateinit var viewComponent: ViewComponent<ComponentStateT>
   private var subscriptions = mutableListOf<ManagedSubscription>()
 
-  private lateinit var viewComponent: ViewComponent<ComponentStateT>
+  val dispatch = reduxViewModel.dispatch
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -32,6 +33,8 @@ abstract class ReduxFragment<StateT : State, ComponentStateT : State> : Fragment
   }
 
   abstract fun onProvideViewModel(): ReduxViewModel<StateT>
+
+  fun getViewComponent() = viewComponent
 
   fun getViewModel() = reduxViewModel
 
@@ -85,7 +88,7 @@ abstract class ReduxFragment<StateT : State, ComponentStateT : State> : Fragment
       )
     }
 
-    reduxViewModel.dispatch(LifecycleAction.ViewCreated(this))
+    dispatch(LifecycleAction.ViewCreated(this))
   }
 
   /**
@@ -109,29 +112,29 @@ abstract class ReduxFragment<StateT : State, ComponentStateT : State> : Fragment
 
   override fun onStart() {
     super.onStart()
-    reduxViewModel.dispatch(LifecycleAction.Starting(this))
+    dispatch(LifecycleAction.Starting(this))
   }
 
   override fun onResume() {
     super.onResume()
     subscriptions.resume()
-    reduxViewModel.dispatch(LifecycleAction.Resuming(this))
+    dispatch(LifecycleAction.Resuming(this))
   }
 
   override fun onPause() {
-    reduxViewModel.dispatch(LifecycleAction.Pausing(this))
+    dispatch(LifecycleAction.Pausing(this))
     subscriptions.pause()
     super.onPause()
   }
 
   override fun onStop() {
-    reduxViewModel.dispatch(LifecycleAction.Stopping(this))
+    dispatch(LifecycleAction.Stopping(this))
     subscriptions.cancel()
     super.onStop()
   }
 
   override fun onDestroy() {
-    reduxViewModel.dispatch(LifecycleAction.Destroying(this))
+    dispatch(LifecycleAction.Destroying(this))
     super.onDestroy()
   }
 }
