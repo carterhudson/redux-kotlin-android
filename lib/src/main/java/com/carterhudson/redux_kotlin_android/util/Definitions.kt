@@ -87,7 +87,7 @@ interface StateObservable<InStateT : State> {
 }
 
 /**
- * Allows [AppCompatActivity] instances to call [provideViewModel].
+ * Allows [AppCompatActivity] instances to call [viewModelProviders].
  *
  * Invokes [ViewModelProvider] on behalf of an [AppCompatActivity] to obtain a [ViewModel] instance tied
  * to said activity. The second parameter wants a [ViewModelProvider.Factory] so it can create an instance
@@ -100,16 +100,16 @@ interface StateObservable<InStateT : State> {
  * specify that the [factoryDelegate] doesn't use the return keyword that would end the process early,
  * so we specify that it's crossinline
  */
-inline fun <reified ViewModelT : ViewModel> AppCompatActivity.provideViewModel(crossinline factoryDelegate: () -> ViewModelT): ViewModelT =
+inline fun <reified ViewModelT : ViewModel> AppCompatActivity.viewModelProviders(crossinline factoryDelegate: () -> ViewModelT): ViewModelT =
   ViewModelProvider(
     this,
     createFactoryWithDelegate(factoryDelegate)
   ).get(ViewModelT::class.java)
 
 /**
- * Allows [Fragment] instances to call [provideViewModel]
+ * Allows [Fragment] instances to call [viewModelProviders]
  */
-inline fun <reified ViewModelT : ViewModel> Fragment.provideViewModel(crossinline factoryDelegate: () -> ViewModelT): ViewModelT =
+inline fun <reified ViewModelT : ViewModel> Fragment.viewModelProviders(crossinline factoryDelegate: () -> ViewModelT): ViewModelT =
   ViewModelProvider(
     this,
     createFactoryWithDelegate(factoryDelegate)

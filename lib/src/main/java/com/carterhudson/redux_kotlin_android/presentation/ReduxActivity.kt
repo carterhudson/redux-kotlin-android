@@ -12,22 +12,24 @@ import com.carterhudson.redux_kotlin_android.util.resume
 
 abstract class ReduxActivity<StateT : State, ComponentStateT : State> : AppCompatActivity() {
 
-  private lateinit var reduxViewModel: ReduxViewModel<StateT>
+  private lateinit var viewModel: ReduxViewModel<StateT>
   private lateinit var viewComponent: ViewComponent<ComponentStateT>
   private val managedSubs = mutableListOf<ManagedSubscription>()
 
+  val dispatch by lazy { viewModel.dispatch }
+
   fun getViewComponent() = viewComponent
 
-  fun getViewModel() = reduxViewModel
+  fun getViewModel() = viewModel
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    reduxViewModel = onCreateViewModel()
-    onViewModelCreated(reduxViewModel)
+    viewModel = onCreateViewModel()
+    onViewModelCreated(viewModel)
 
     viewComponent = onCreateViewComponent()
-    with(reduxViewModel) {
+    with(viewModel) {
       managedSubs.addAll(
         subscribe(viewComponent::render, distinct(), ::onSelectState),
         subscribe(::performSideEffect)
@@ -57,7 +59,7 @@ abstract class ReduxActivity<StateT : State, ComponentStateT : State> : AppCompa
   /**
    * Delegate method.
    * Invoked after [onCreateViewModel].
-   * Sets [reduxViewModel] reference.
+   * Sets [viewModel] reference.
    *
    * @param createViewModel function providing a redux view model
    */
@@ -112,29 +114,29 @@ abstract class ReduxActivity<StateT : State, ComponentStateT : State> : AppCompa
 
   override fun onStart() {
     super.onStart()
-    reduxViewModel.dispatch(LifecycleAction.Starting(this))
+    dispatch(LifecycleAction.Starting(this))
   }
 
   override fun onResume() {
     super.onResume()
     managedSubs.resume()
-    reduxViewModel.dispatch(LifecycleAction.Resuming(this))
+    dispatch(LifecycleAction.Resuming(this))
   }
 
   override fun onPause() {
-    reduxViewModel.dispatch(LifecycleAction.Pausing(this))
+    dispatch(LifecycleAction.Pausing(this))
     managedSubs.pause()
     super.onPause()
   }
 
   override fun onStop() {
-    reduxViewModel.dispatch(LifecycleAction.Stopping(this))
+    dispatch(LifecycleAction.Stopping(this))
     managedSubs.cancel()
     super.onStop()
   }
 
   override fun onDestroy() {
-    reduxViewModel.dispatch(LifecycleAction.Destroying(this))
+    dispatch(LifecycleAction.Destroying(this))
     super.onDestroy()
   }
 }

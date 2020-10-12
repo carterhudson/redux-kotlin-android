@@ -1,6 +1,7 @@
 package com.carterhudson.example.feature.counter
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import com.carterhudson.example.databinding.CounterLayoutBinding
 import com.carterhudson.example.feature.counter.CounterAction.Decrement
@@ -14,7 +15,7 @@ class CounterViewComponent(
   dispatch: Dispatcher
 ) : ViewComponent<CounterState>() {
 
-  override val binding: CounterLayoutBinding =
+  val binding: CounterLayoutBinding =
     CounterLayoutBinding.inflate(inflater, container, false).apply {
       incrementButton.setOnClickListener {
         dispatch(Increment())
@@ -24,6 +25,8 @@ class CounterViewComponent(
         dispatch(Decrement())
       }
     }
+
+  override fun root(): View = binding.root
 
   override fun render(state: CounterState) {
     binding.counterTextView.text = state.count.toString()
