@@ -8,7 +8,6 @@ import com.carterhudson.redux_kotlin_android.util.addAll
 import com.carterhudson.redux_kotlin_android.util.cancel
 import com.carterhudson.redux_kotlin_android.util.lifecycle.LifecycleAction
 import com.carterhudson.redux_kotlin_android.util.pause
-import com.carterhudson.redux_kotlin_android.util.provideViewModel
 import com.carterhudson.redux_kotlin_android.util.resume
 
 abstract class ReduxActivity<StateT : State, ComponentStateT : State> : AppCompatActivity() {
@@ -24,21 +23,27 @@ abstract class ReduxActivity<StateT : State, ComponentStateT : State> : AppCompa
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    onViewModelCreated {
-      provideViewModel {
-        onCreateViewModel()
-      }
-    }
+    reduxViewModel = onCreateViewModel()
+    onViewModelCreated(reduxViewModel)
 
-    setContentView {
-      onViewComponentCreated {
-        onCreateViewComponent()
-      }
+    viewComponent = onCreateViewComponent()
+    with(reduxViewModel) {
+      managedSubs.addAll(
+        subscribe(viewComponent::render, distinct(), ::onSelectState),
+        subscribe(::performSideEffect)
+      )
     }
+    onViewComponentCreated(viewComponent)
+    setContentView(viewComponent)
   }
 
-  protected open fun setContentView(createViewComponent: () -> ViewComponent<ComponentStateT>?) {
-    setContentView(createViewComponent()?.root())
+  /**
+   * Overrides [AppCompatActivity.setContentView] to use [viewComponent]
+   *
+   * @param viewComponent - the component whose [ViewComponent.root] will be used as the content view.
+   */
+  protected open fun setContentView(viewComponent: ViewComponent<ComponentStateT>) {
+    setContentView(viewComponent.root())
   }
 
   /**
@@ -56,8 +61,8 @@ abstract class ReduxActivity<StateT : State, ComponentStateT : State> : AppCompa
    *
    * @param createViewModel function providing a redux view model
    */
-  protected open fun onViewModelCreated(createViewModel: () -> ReduxViewModel<StateT>) {
-    createViewModel().also { reduxViewModel = it }
+  protected open fun onViewModelCreated(viewModel: ReduxViewModel<StateT>) {
+    //optional
   }
 
   /**
@@ -73,18 +78,9 @@ abstract class ReduxActivity<StateT : State, ComponentStateT : State> : AppCompa
    * Invoked when a [ViewComponent] is created
    * Retains the view component and subscribes to state & side effects
    */
-  protected open fun onViewComponentCreated(
-    createViewComponent: () -> ViewComponent<ComponentStateT>
-  ): ViewComponent<ComponentStateT> = createViewComponent()
-      .also { viewComponent = it }
-      .also { component ->
-        with(reduxViewModel) {
-          managedSubs.addAll(
-              subscribe(component::render, distinct(), ::onSelectState),
-              subscribe(::performSideEffect)
-          )
-        }
-      }
+  protected open fun onViewComponentCreated(viewComponent: ViewComponent<ComponentStateT>) {
+    //optional
+  }
 
   /**
    * Delegate method (Required).

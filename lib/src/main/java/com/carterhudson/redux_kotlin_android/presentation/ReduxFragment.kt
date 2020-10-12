@@ -11,7 +11,6 @@ import com.carterhudson.redux_kotlin_android.util.addAll
 import com.carterhudson.redux_kotlin_android.util.cancel
 import com.carterhudson.redux_kotlin_android.util.lifecycle.LifecycleAction
 import com.carterhudson.redux_kotlin_android.util.pause
-import com.carterhudson.redux_kotlin_android.util.provideViewModel
 import com.carterhudson.redux_kotlin_android.util.resume
 
 abstract class ReduxFragment<StateT : State, ComponentStateT : State> : Fragment() {
@@ -24,11 +23,7 @@ abstract class ReduxFragment<StateT : State, ComponentStateT : State> : Fragment
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-
-    provideViewModel {
-      onCreateViewModel().also { viewModel = it }
-    }
-
+    onCreateViewModel().also { viewModel = it }
     onViewModelCreated(viewModel)
   }
 
