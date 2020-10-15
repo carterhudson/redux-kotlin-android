@@ -19,8 +19,8 @@ class MainActivity : ReduxActivity<AppState, CounterState>() {
   override fun onCreateViewModel(): ReduxViewModel<AppState> =
     viewModelProviders { ExampleApp.injector.appViewModel() }
 
-  override fun onCreateViewComponent(): ViewComponent<CounterState> =
-    CounterViewComponent(inflater = layoutInflater, dispatch = dispatch)
+//  override fun onCreateViewComponent(): ViewComponent<CounterState> =
+//    CounterViewComponent(inflater = layoutInflater, dispatch = dispatch)
 
   override fun onSelectState(state: AppState): CounterState = state.counterState
 

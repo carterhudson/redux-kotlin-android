@@ -13,7 +13,7 @@ import com.carterhudson.redux_kotlin_android.util.resume
 abstract class ReduxActivity<StateT : State, ComponentStateT : State> : AppCompatActivity() {
 
   private lateinit var viewModel: ReduxViewModel<StateT>
-  private lateinit var viewComponent: ViewComponent<ComponentStateT>
+  private var viewComponent: ViewComponent<ComponentStateT>? = null
   private val managedSubs = mutableListOf<ManagedSubscription>()
 
   val dispatch by lazy { viewModel.dispatch }
@@ -31,12 +31,12 @@ abstract class ReduxActivity<StateT : State, ComponentStateT : State> : AppCompa
     viewComponent = onCreateViewComponent()
     with(viewModel) {
       managedSubs.addAll(
-        subscribe(viewComponent::render, distinct(), ::onSelectState),
+        subscribe({ viewComponent?.render(it) }, distinct(), ::onSelectState),
         subscribe(::performSideEffect)
       )
     }
     onViewComponentCreated(viewComponent)
-    setContentView(viewComponent)
+    viewComponent?.let(::setContentView)
   }
 
   /**
@@ -73,14 +73,14 @@ abstract class ReduxActivity<StateT : State, ComponentStateT : State> : AppCompa
    *
    * @return the created [ViewComponent] instance.
    */
-  protected abstract fun onCreateViewComponent(): ViewComponent<ComponentStateT>
+  open fun onCreateViewComponent(): ViewComponent<ComponentStateT>? = null
 
   /**
    * Delegate method invoked after [onCreateViewComponent]
    * Invoked when a [ViewComponent] is created
    * Retains the view component and subscribes to state & side effects
    */
-  protected open fun onViewComponentCreated(viewComponent: ViewComponent<ComponentStateT>) {
+  protected open fun onViewComponentCreated(viewComponent: ViewComponent<ComponentStateT>?) {
     //optional
   }
 

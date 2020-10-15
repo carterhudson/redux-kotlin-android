@@ -16,7 +16,7 @@ import com.carterhudson.redux_kotlin_android.util.resume
 abstract class ReduxFragment<StateT : State, ComponentStateT : State> : Fragment() {
 
   private lateinit var viewModel: ReduxViewModel<StateT>
-  private lateinit var viewComponent: ViewComponent<ComponentStateT>
+  private var viewComponent: ViewComponent<ComponentStateT>? = null
   private var subscriptions = mutableListOf<ManagedSubscription>()
 
   val dispatch by lazy { viewModel.dispatch }
@@ -48,10 +48,9 @@ abstract class ReduxFragment<StateT : State, ComponentStateT : State> : Fragment
     .also { viewComponent = it }
     .also { viewModel.dispatch(LifecycleAction.CreatingView(this)) }
     .also { onViewComponentCreated(viewComponent) }
-    .root()
+    ?.root()
 
   /**
-   * Delegate method (Required).
    * Invoked in order to obtain a [ViewComponent] instance.
    * Called from [Fragment.onCreateView]
    *
@@ -60,13 +59,13 @@ abstract class ReduxFragment<StateT : State, ComponentStateT : State> : Fragment
    * @param savedInstanceState bundle provided by [Fragment.onCreateView]
    * @return the created [ViewComponent] instance.
    */
-  abstract fun onCreateViewComponent(
+  open fun onCreateViewComponent(
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
-  ): ViewComponent<ComponentStateT>
+  ): ViewComponent<ComponentStateT>? = null
 
-  open fun onViewComponentCreated(viewComponent: ViewComponent<ComponentStateT>) {
+  open fun onViewComponentCreated(viewComponent: ViewComponent<ComponentStateT>?) {
     //optional
   }
 
@@ -83,7 +82,7 @@ abstract class ReduxFragment<StateT : State, ComponentStateT : State> : Fragment
 
     with(viewModel) {
       subscriptions.addAll(
-        subscribe(viewComponent::render, distinct(), ::onSelectState),
+        subscribe({ viewComponent?.render(it) }, distinct(), ::onSelectState),
         subscribe(::performSideEffect)
       )
     }
