@@ -3,24 +3,27 @@ package com.carterhudson.redux_kotlin_android.presentation
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.carterhudson.redux_kotlin_android.util.ManagedSubscription
+import com.carterhudson.redux_kotlin_android.util.Renderer
 import com.carterhudson.redux_kotlin_android.util.State
 import com.carterhudson.redux_kotlin_android.util.addAll
 import com.carterhudson.redux_kotlin_android.util.cancel
 import com.carterhudson.redux_kotlin_android.util.lifecycle.LifecycleAction
 import com.carterhudson.redux_kotlin_android.util.pause
 import com.carterhudson.redux_kotlin_android.util.resume
+import com.carterhudson.redux_kotlin_android.util.safeCast
+import org.reduxkotlin.Dispatcher
 
-abstract class ReduxActivity<StateT : State, ComponentStateT : State> : AppCompatActivity() {
+abstract class ReduxActivity<StateT : State, RenderStateT : State> : AppCompatActivity() {
 
   private lateinit var viewModel: ReduxViewModel<StateT>
-  private var viewComponent: ViewComponent<ComponentStateT>? = null
-  private val managedSubs = mutableListOf<ManagedSubscription>()
+  private var renderer: Renderer<RenderStateT>? = null
+  private val managedSubs: MutableList<ManagedSubscription> = mutableListOf()
 
-  val dispatch by lazy { viewModel.dispatch }
+  val dispatch: Dispatcher by lazy { viewModel.dispatch }
 
-  fun getViewComponent() = viewComponent
+  fun getRenderer(): Renderer<RenderStateT>? = renderer
 
-  fun getViewModel() = viewModel
+  fun getViewModel(): ReduxViewModel<StateT> = viewModel
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -28,24 +31,24 @@ abstract class ReduxActivity<StateT : State, ComponentStateT : State> : AppCompa
     viewModel = onCreateViewModel()
     onViewModelCreated(viewModel)
 
-    viewComponent = onCreateViewComponent()
+    renderer = onCreateViewComponent()
     with(viewModel) {
       managedSubs.addAll(
-        subscribe({ viewComponent?.render(it) }, distinct(), ::onSelectState),
+        subscribe({ renderer?.render(it) }, distinct(), ::onSelectState),
         subscribe(::performSideEffect)
       )
     }
-    onViewComponentCreated(viewComponent)
-    viewComponent?.let(::setContentView)
+    onRendererCreated(renderer)
+    renderer?.safeCast<ViewRenderer<RenderStateT>>()?.let(::setContentView)
   }
 
   /**
-   * Overrides [AppCompatActivity.setContentView] to use [viewComponent]
+   * Overrides [AppCompatActivity.setContentView] to use [viewRenderer]
    *
-   * @param viewComponent - the component whose [ViewComponent.root] will be used as the content view.
+   * @param viewRenderer - the component whose [ViewRenderer.root] will be used as the content view.
    */
-  protected open fun setContentView(viewComponent: ViewComponent<ComponentStateT>) {
-    setContentView(viewComponent.root())
+  protected open fun setContentView(viewRenderer: ViewRenderer<RenderStateT>) {
+    setContentView(viewRenderer.root())
   }
 
   /**
@@ -61,7 +64,7 @@ abstract class ReduxActivity<StateT : State, ComponentStateT : State> : AppCompa
    * Invoked after [onCreateViewModel].
    * Sets [viewModel] reference.
    *
-   * @param createViewModel function providing a redux view model
+   * @param viewModel - the viewModel
    */
   protected open fun onViewModelCreated(viewModel: ReduxViewModel<StateT>) {
     //optional
@@ -69,18 +72,18 @@ abstract class ReduxActivity<StateT : State, ComponentStateT : State> : AppCompa
 
   /**
    * Delegate method (Required).
-   * Invoked in order to obtain a [ViewComponent] instance.
+   * Invoked in order to obtain a [ViewRenderer] instance.
    *
-   * @return the created [ViewComponent] instance.
+   * @return the created [ViewRenderer] instance.
    */
-  open fun onCreateViewComponent(): ViewComponent<ComponentStateT>? = null
+  open fun onCreateViewComponent(): ViewRenderer<RenderStateT>? = null
 
   /**
    * Delegate method invoked after [onCreateViewComponent]
-   * Invoked when a [ViewComponent] is created
+   * Invoked when a [ViewRenderer] is created
    * Retains the view component and subscribes to state & side effects
    */
-  protected open fun onViewComponentCreated(viewComponent: ViewComponent<ComponentStateT>?) {
+  protected open fun onRendererCreated(renderer: Renderer<RenderStateT>?) {
     //optional
   }
 
@@ -91,7 +94,7 @@ abstract class ReduxActivity<StateT : State, ComponentStateT : State> : AppCompa
    * @param state The state to be mapped from
    * @return The state that is mapped to
    */
-  protected abstract fun onSelectState(state: StateT): ComponentStateT
+  protected abstract fun onSelectState(state: StateT): RenderStateT
 
   /**
    * Delegate method (Optional).

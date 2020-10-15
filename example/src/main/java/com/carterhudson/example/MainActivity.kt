@@ -3,10 +3,10 @@ package com.carterhudson.example
 import android.os.Bundle
 import android.widget.Toast
 import com.carterhudson.example.feature.counter.CounterState
-import com.carterhudson.example.feature.counter.CounterViewComponent
+import com.carterhudson.example.feature.counter.CounterViewRenderer
 import com.carterhudson.redux_kotlin_android.presentation.ReduxActivity
 import com.carterhudson.redux_kotlin_android.presentation.ReduxViewModel
-import com.carterhudson.redux_kotlin_android.presentation.ViewComponent
+import com.carterhudson.redux_kotlin_android.presentation.ViewRenderer
 import com.carterhudson.redux_kotlin_android.util.viewModelProviders
 
 class MainActivity : ReduxActivity<AppState, CounterState>() {
@@ -19,8 +19,8 @@ class MainActivity : ReduxActivity<AppState, CounterState>() {
   override fun onCreateViewModel(): ReduxViewModel<AppState> =
     viewModelProviders { ExampleApp.injector.appViewModel() }
 
-//  override fun onCreateViewComponent(): ViewComponent<CounterState> =
-//    CounterViewComponent(inflater = layoutInflater, dispatch = dispatch)
+  override fun onCreateViewComponent(): ViewRenderer<CounterState> =
+    CounterViewRenderer(inflater = layoutInflater, dispatch = dispatch)
 
   override fun onSelectState(state: AppState): CounterState = state.counterState
 

@@ -6,17 +6,19 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.carterhudson.redux_kotlin_android.util.ManagedSubscription
+import com.carterhudson.redux_kotlin_android.util.Renderer
 import com.carterhudson.redux_kotlin_android.util.State
 import com.carterhudson.redux_kotlin_android.util.addAll
 import com.carterhudson.redux_kotlin_android.util.cancel
 import com.carterhudson.redux_kotlin_android.util.lifecycle.LifecycleAction
 import com.carterhudson.redux_kotlin_android.util.pause
 import com.carterhudson.redux_kotlin_android.util.resume
+import com.carterhudson.redux_kotlin_android.util.safeCast
 
-abstract class ReduxFragment<StateT : State, ComponentStateT : State> : Fragment() {
+abstract class ReduxFragment<StateT : State, RenderStateT : State> : Fragment() {
 
   private lateinit var viewModel: ReduxViewModel<StateT>
-  private var viewComponent: ViewComponent<ComponentStateT>? = null
+  private var renderer: Renderer<RenderStateT>? = null
   private var subscriptions = mutableListOf<ManagedSubscription>()
 
   val dispatch by lazy { viewModel.dispatch }
@@ -35,37 +37,38 @@ abstract class ReduxFragment<StateT : State, ComponentStateT : State> : Fragment
 
   /**
    * Overridden from [Fragment.onCreateView].
-   * Assigns [viewComponent] reference.
+   * Assigns [renderer] reference.
    * Dispatches [LifecycleAction.CreatingView].
    *
-   * @return the root view of the created [viewComponent]
+   * @return the root view of the created [renderer]
    */
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
-  ): View? = onCreateViewComponent(inflater, container, savedInstanceState)
-    .also { viewComponent = it }
+  ): View? = onCreateRenderer(inflater, container, savedInstanceState)
+    .also { renderer = it }
     .also { viewModel.dispatch(LifecycleAction.CreatingView(this)) }
-    .also { onViewComponentCreated(viewComponent) }
+    .also { onRendererCreated(renderer) }
+    ?.safeCast<ViewRenderer<RenderStateT>>()
     ?.root()
 
   /**
-   * Invoked in order to obtain a [ViewComponent] instance.
+   * Invoked in order to obtain a [ViewRenderer] instance.
    * Called from [Fragment.onCreateView]
    *
    * @param inflater layout inflater provided by [Fragment.onCreateView]
    * @param container container provided by [Fragment.onCreateView]
    * @param savedInstanceState bundle provided by [Fragment.onCreateView]
-   * @return the created [ViewComponent] instance.
+   * @return the created [ViewRenderer] instance.
    */
-  open fun onCreateViewComponent(
+  open fun onCreateRenderer(
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
-  ): ViewComponent<ComponentStateT>? = null
+  ): Renderer<RenderStateT>? = null
 
-  open fun onViewComponentCreated(viewComponent: ViewComponent<ComponentStateT>?) {
+  open fun onRendererCreated(renderer: Renderer<RenderStateT>?) {
     //optional
   }
 
@@ -82,7 +85,7 @@ abstract class ReduxFragment<StateT : State, ComponentStateT : State> : Fragment
 
     with(viewModel) {
       subscriptions.addAll(
-        subscribe({ viewComponent?.render(it) }, distinct(), ::onSelectState),
+        subscribe({ renderer?.render(it) }, distinct(), ::onSelectState),
         subscribe(::performSideEffect)
       )
     }
@@ -109,7 +112,7 @@ abstract class ReduxFragment<StateT : State, ComponentStateT : State> : Fragment
     //optional
   }
 
-  abstract fun onSelectState(inState: StateT): ComponentStateT
+  abstract fun onSelectState(inState: StateT): RenderStateT
 
   override fun onStart() {
     super.onStart()

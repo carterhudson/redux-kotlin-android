@@ -6,14 +6,14 @@ import android.view.ViewGroup
 import com.carterhudson.example.databinding.CounterLayoutBinding
 import com.carterhudson.example.feature.counter.CounterAction.Decrement
 import com.carterhudson.example.feature.counter.CounterAction.Increment
-import com.carterhudson.redux_kotlin_android.presentation.ViewComponent
+import com.carterhudson.redux_kotlin_android.presentation.ViewRenderer
 import org.reduxkotlin.Dispatcher
 
-class CounterViewComponent(
+class CounterViewRenderer(
   container: ViewGroup? = null,
   inflater: LayoutInflater,
   dispatch: Dispatcher
-) : ViewComponent<CounterState>() {
+) : ViewRenderer<CounterState>() {
 
   val binding: CounterLayoutBinding =
     CounterLayoutBinding.inflate(inflater, container, false).apply {

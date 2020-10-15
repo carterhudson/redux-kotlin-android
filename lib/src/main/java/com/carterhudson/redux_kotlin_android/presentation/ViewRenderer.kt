@@ -10,9 +10,9 @@ import com.carterhudson.redux_kotlin_android.util.State
  *
  * Note: Many View Components can be composed into a single root View Component per controller.
  *
- * @param StateT the state the [ViewComponent] will [render]
+ * @param StateT the state the [ViewRenderer] will [render]
  */
-abstract class ViewComponent<StateT : State> : Renderer<StateT> {
+abstract class ViewRenderer<StateT : State> : Renderer<StateT> {
 
   abstract fun root() : View
 
