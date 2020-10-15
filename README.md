@@ -1,6 +1,8 @@
 ### Tools for working with [redux-kotlin](https://github.com/reduxkotlin/redux-kotlin) in an Android environment.
 [![](https://jitpack.io/v/carterhudson/redux-kotlin-android.svg)](https://jitpack.io/#carterhudson/redux-kotlin-android)
 
+## Note: experimental & changing frequently! The latest changes can be found on `master-SNAPSHOT` through JitPack.
+
 # Getting Started
 This library provides a ready-made framework for working with Redux in a Kotlin Android environment. Getting off the ground is relatively easy, given that you are familiar with Redux or transactional state management. It provides two main entry points in `ReduxActivity` and `ReduxFragment`:
 ```kotlin
