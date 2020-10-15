@@ -31,7 +31,7 @@ abstract class ReduxActivity<StateT : State, RenderStateT : State> : AppCompatAc
     viewModel = onCreateViewModel()
     onViewModelCreated(viewModel)
 
-    renderer = onCreateViewComponent()
+    renderer = onCreateRenderer()
     with(viewModel) {
       managedSubs.addAll(
         subscribe({ renderer?.render(it) }, distinct(), ::onSelectState),
@@ -76,10 +76,10 @@ abstract class ReduxActivity<StateT : State, RenderStateT : State> : AppCompatAc
    *
    * @return the created [ViewRenderer] instance.
    */
-  open fun onCreateViewComponent(): ViewRenderer<RenderStateT>? = null
+  open fun onCreateRenderer(): Renderer<RenderStateT>? = null
 
   /**
-   * Delegate method invoked after [onCreateViewComponent]
+   * Delegate method invoked after [onCreateRenderer]
    * Invoked when a [ViewRenderer] is created
    * Retains the view component and subscribes to state & side effects
    */
