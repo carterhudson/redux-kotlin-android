@@ -15,7 +15,7 @@ import org.reduxkotlin.Dispatcher
 
 abstract class ReduxActivity<StateT : State, RenderStateT : State> : AppCompatActivity() {
 
-  private lateinit var viewModel: ReduxViewModel<StateT>
+  private lateinit var viewModel: StoreViewModel<StateT>
   private var renderer: Renderer<RenderStateT>? = null
   private val managedSubs: MutableList<ManagedSubscription> = mutableListOf()
 
@@ -23,7 +23,7 @@ abstract class ReduxActivity<StateT : State, RenderStateT : State> : AppCompatAc
 
   fun getRenderer(): Renderer<RenderStateT>? = renderer
 
-  fun getViewModel(): ReduxViewModel<StateT> = viewModel
+  fun getViewModel(): StoreViewModel<StateT> = viewModel
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -53,11 +53,11 @@ abstract class ReduxActivity<StateT : State, RenderStateT : State> : AppCompatAc
 
   /**
    * Delegate method.
-   * Invoked in order to obtain a [ReduxViewModel] instance.
+   * Invoked in order to obtain a [StoreViewModel] instance.
    *
-   * @return the provided [ReduxViewModel] instance.
+   * @return the provided [StoreViewModel] instance.
    */
-  protected abstract fun onCreateViewModel(): ReduxViewModel<StateT>
+  protected abstract fun onCreateViewModel(): StoreViewModel<StateT>
 
   /**
    * Delegate method.
@@ -66,9 +66,7 @@ abstract class ReduxActivity<StateT : State, RenderStateT : State> : AppCompatAc
    *
    * @param viewModel - the viewModel
    */
-  protected open fun onViewModelCreated(viewModel: ReduxViewModel<StateT>) {
-    //optional
-  }
+  protected open fun onViewModelCreated(viewModel: StoreViewModel<StateT>) = Unit
 
   /**
    * Delegate method (Required).
@@ -83,9 +81,7 @@ abstract class ReduxActivity<StateT : State, RenderStateT : State> : AppCompatAc
    * Invoked when a [ViewRenderer] is created
    * Retains the view component and subscribes to state & side effects
    */
-  protected open fun onRendererCreated(renderer: Renderer<RenderStateT>?) {
-    //optional
-  }
+  protected open fun onRendererCreated(renderer: Renderer<RenderStateT>?) = Unit
 
   /**
    * Delegate method (Required).
@@ -111,9 +107,7 @@ abstract class ReduxActivity<StateT : State, RenderStateT : State> : AppCompatAc
    * @param state
    * @param action
    */
-  protected open fun performSideEffect(state: StateT, action: Any) {
-    //optional
-  }
+  protected open fun performSideEffect(state: StateT, action: Any) = Unit
 
   override fun onStart() {
     super.onStart()

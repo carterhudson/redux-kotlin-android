@@ -19,7 +19,7 @@ import org.reduxkotlin.StoreSubscription
  * @param StateT the type of state emitted by the [Store]
  * @property store the [Store] instance itself
  */
-open class ReduxSubscriptionManager<StateT : State>(private val store: Store<StateT>) :
+open class StoreSubscriptionManager<StateT : State>(private val store: Store<StateT>) :
   StateObservable<StateT>,
   PostDispatchObservable<StateT> {
 
@@ -41,19 +41,20 @@ open class ReduxSubscriptionManager<StateT : State>(private val store: Store<Sta
   /**
    * Creates and adds a [StateObserver] to [stateObservers].
    *
-   * @param SlicedStateT the mapped state that the [render] function cares about.
-   * @param render the render method to be invoked on state changes
+   * @param SlicedStateT the mapped state that the [handleState] function cares about.
+   * @param handleState the render method to be invoked on state changes
    * @param distinct flag indicating whether enforce distinct states
    * @param select function for [StateT] to [SlicedStateT]
    * @return a [ManagedSubscription]
    */
   override fun <SlicedStateT : State> subscribe(
-    render: (SlicedStateT) -> Unit,
+    handleState: (SlicedStateT) -> Unit,
     distinct: Boolean,
     select: (StateT) -> SlicedStateT
   ): ManagedSubscription = object : ManagedSubscription() {}.also { sub ->
-    StateObserver(render, distinct, select, sub).also { obs ->
+    StateObserver(handleState, distinct, select, sub).also { obs ->
       stateObservers.add(obs)
+      // notify on subscribe with latest state
       obs.notify(store.getState())
     }
   }

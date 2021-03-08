@@ -12,7 +12,7 @@ import com.carterhudson.redux_kotlin_android.util.StateObservable
  * @param StateT
  * @property subscriptionManager
  */
-open class ReduxViewModel<StateT : State>(private val subscriptionManager: ReduxSubscriptionManager<StateT>) :
+open class StoreViewModel<StateT : State>(private val subscriptionManager: StoreSubscriptionManager<StateT>) :
   ViewModel(),
   StateObservable<StateT> by subscriptionManager,
   PostDispatchObservable<StateT> by subscriptionManager {

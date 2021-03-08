@@ -3,10 +3,10 @@ package com.carterhudson.example.inject
 import com.carterhudson.example.AppState
 import com.carterhudson.example.feature.counter.counterStateReducer
 import com.carterhudson.example.feature.todo.toDoStateReducer
-import com.carterhudson.redux_kotlin_android.presentation.ReduxSubscriptionManager
-import com.carterhudson.redux_kotlin_android.presentation.ReduxViewModel
+import com.carterhudson.redux_kotlin_android.presentation.StoreSubscriptionManager
 import com.carterhudson.redux_kotlin_android.util.Action
 import com.carterhudson.redux_kotlin_android.util.createStoreWithSideEffects
+import com.carterhudson.redux_kotlin_android.util.viewModelFactory
 import dagger.Module
 import dagger.Provides
 import org.reduxkotlin.Reducer
@@ -34,8 +34,9 @@ class ApplicationModule {
   ) = createStoreWithSideEffects(reducer, state)
 
   @Provides
-  fun provideStoreSubManager(store: Store<AppState>) = ReduxSubscriptionManager(store)
+  fun provideStoreSubManager(store: Store<AppState>) = StoreSubscriptionManager(store)
 
   @Provides
-  fun provideStoreViewModel(subMgr: ReduxSubscriptionManager<AppState>) = ReduxViewModel(subMgr)
+  fun provideViewModelFactory(subscriptionManager: StoreSubscriptionManager<AppState>) =
+    viewModelFactory(subscriptionManager)
 }

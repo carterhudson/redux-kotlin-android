@@ -2,8 +2,8 @@ package com.carterhudson.redux_kotlin_android.util
 
 open class ManagedSubscription {
 
-  protected var canceled: Boolean = false
-  protected var paused: Boolean = false
+  private var canceled: Boolean = false
+  private var paused: Boolean = false
 
   open fun cancel() {
     if (isCanceled()) {

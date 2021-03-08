@@ -21,7 +21,5 @@ abstract class ViewRenderer<StateT : State> : Renderer<StateT> {
    *
    * @param state the current state the UI cares about
    */
-  override fun render(state: StateT) {
-    //optional
-  }
+  override fun render(state: StateT) = Unit
 }

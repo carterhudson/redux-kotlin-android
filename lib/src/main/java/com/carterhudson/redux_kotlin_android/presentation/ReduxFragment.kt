@@ -17,7 +17,7 @@ import com.carterhudson.redux_kotlin_android.util.safeCast
 
 abstract class ReduxFragment<StateT : State, RenderStateT : State> : Fragment() {
 
-  private lateinit var viewModel: ReduxViewModel<StateT>
+  private lateinit var viewModel: StoreViewModel<StateT>
   private var renderer: Renderer<RenderStateT>? = null
   private var subscriptions = mutableListOf<ManagedSubscription>()
 
@@ -29,11 +29,9 @@ abstract class ReduxFragment<StateT : State, RenderStateT : State> : Fragment() 
     onViewModelCreated(viewModel)
   }
 
-  abstract fun onCreateViewModel(): ReduxViewModel<StateT>
+  abstract fun onCreateViewModel(): StoreViewModel<StateT>
 
-  open fun onViewModelCreated(viewModel: ReduxViewModel<StateT>) {
-    //optional
-  }
+  open fun onViewModelCreated(viewModel: StoreViewModel<StateT>) = Unit
 
   /**
    * Overridden from [Fragment.onCreateView].
@@ -68,9 +66,7 @@ abstract class ReduxFragment<StateT : State, RenderStateT : State> : Fragment() 
     savedInstanceState: Bundle?
   ): Renderer<RenderStateT>? = null
 
-  open fun onRendererCreated(renderer: Renderer<RenderStateT>?) {
-    //optional
-  }
+  open fun onRendererCreated(renderer: Renderer<RenderStateT>?) = Unit
 
   /**
    * Overridden from [Fragment.onViewCreated]
@@ -108,9 +104,7 @@ abstract class ReduxFragment<StateT : State, RenderStateT : State> : Fragment() 
    * @param state
    * @param action
    */
-  protected open fun performSideEffect(state: StateT, action: Any) {
-    //optional
-  }
+  protected open fun performSideEffect(state: StateT, action: Any) = Unit
 
   abstract fun onSelectState(inState: StateT): RenderStateT
 

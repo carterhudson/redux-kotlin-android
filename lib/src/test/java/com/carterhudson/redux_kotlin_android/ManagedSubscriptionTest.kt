@@ -28,7 +28,7 @@ class ManagedSubscriptionTest : BehaviorSpec() {
     Given("a state observable") {
       val stateObservable = object : StateObservable<State> {
         override fun <OutStateT : State> subscribe(
-          render: (OutStateT) -> Unit,
+          handleState: (OutStateT) -> Unit,
           distinct: Boolean,
           select: (State) -> OutStateT
         ): ManagedSubscription = object : ManagedSubscription() {}.also {
