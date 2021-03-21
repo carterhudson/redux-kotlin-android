@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.carterhudson.redux_kotlin_android.util.ManagedSubscription
 import com.carterhudson.redux_kotlin_android.util.Renderer
-import com.carterhudson.redux_kotlin_android.util.State
+import com.carterhudson.redux_kotlin_android.util.ReduxState
 import com.carterhudson.redux_kotlin_android.util.addAll
 import com.carterhudson.redux_kotlin_android.util.cancel
 import com.carterhudson.redux_kotlin_android.util.lifecycle.LifecycleAction
@@ -13,7 +13,7 @@ import com.carterhudson.redux_kotlin_android.util.resume
 import com.carterhudson.redux_kotlin_android.util.safeCast
 import org.reduxkotlin.Dispatcher
 
-abstract class ReduxActivity<StateT : State, RenderStateT : State> : AppCompatActivity() {
+abstract class ReduxActivity<StateT : ReduxState, RenderStateT : ReduxState> : AppCompatActivity() {
 
   private lateinit var viewModel: StoreViewModel<StateT>
   private var renderer: Renderer<RenderStateT>? = null
@@ -34,8 +34,10 @@ abstract class ReduxActivity<StateT : State, RenderStateT : State> : AppCompatAc
     renderer = onCreateRenderer()
     with(viewModel) {
       managedSubs.addAll(
-        subscribe({ renderer?.render(it) }, distinct(), ::onSelectState),
-        subscribe(::performSideEffect)
+        onStateChanged(::onSelectState, distinct()) {
+          renderer?.render(it)
+        },
+        addSideEffectHandler(::performSideEffect)
       )
     }
     onRendererCreated(renderer)

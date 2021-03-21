@@ -9,7 +9,7 @@ package com.carterhudson.redux_kotlin_android.util
  * the [SlicedStateT] has changed.
  * @property selector a function for selectively transforming [StateT] to [SlicedStateT]
  */
-data class StateObserver<StateT : State, SlicedStateT : State>(
+data class StateObserver<StateT : ReduxState, SlicedStateT : ReduxState>(
   private val handler: (SlicedStateT) -> Unit,
   private val distinct: Boolean,
   private val selector: (StateT) -> SlicedStateT,

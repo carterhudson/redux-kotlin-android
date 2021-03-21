@@ -1,8 +1,8 @@
 package com.carterhudson.redux_kotlin_android.presentation
 
 import androidx.lifecycle.ViewModel
-import com.carterhudson.redux_kotlin_android.util.PostDispatchObservable
-import com.carterhudson.redux_kotlin_android.util.State
+import com.carterhudson.redux_kotlin_android.util.SideEffectObservable
+import com.carterhudson.redux_kotlin_android.util.ReduxState
 import com.carterhudson.redux_kotlin_android.util.StateObservable
 
 /**
@@ -12,10 +12,10 @@ import com.carterhudson.redux_kotlin_android.util.StateObservable
  * @param StateT
  * @property subscriptionManager
  */
-open class StoreViewModel<StateT : State>(private val subscriptionManager: StoreSubscriptionManager<StateT>) :
+open class StoreViewModel<StateT : ReduxState>(private val subscriptionManager: StoreSubscriptionManager<StateT>) :
   ViewModel(),
   StateObservable<StateT> by subscriptionManager,
-  PostDispatchObservable<StateT> by subscriptionManager {
+  SideEffectObservable<StateT> by subscriptionManager {
 
   val dispatch = subscriptionManager.dispatch
 

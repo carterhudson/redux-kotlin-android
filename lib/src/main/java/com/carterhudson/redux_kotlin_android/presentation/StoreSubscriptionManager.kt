@@ -1,11 +1,11 @@
 package com.carterhudson.redux_kotlin_android.presentation
 
 import com.carterhudson.redux_kotlin_android.util.ManagedSubscription
-import com.carterhudson.redux_kotlin_android.util.PostDispatchHandler
-import com.carterhudson.redux_kotlin_android.util.PostDispatchObservable
-import com.carterhudson.redux_kotlin_android.util.PostDispatchObserver
-import com.carterhudson.redux_kotlin_android.util.PostDispatchSubject
-import com.carterhudson.redux_kotlin_android.util.State
+import com.carterhudson.redux_kotlin_android.util.SideEffectObserver
+import com.carterhudson.redux_kotlin_android.util.ReduxState
+import com.carterhudson.redux_kotlin_android.util.SideEffectHandler
+import com.carterhudson.redux_kotlin_android.util.SideEffectObservable
+import com.carterhudson.redux_kotlin_android.util.SideEffectSubject
 import com.carterhudson.redux_kotlin_android.util.StateObservable
 import com.carterhudson.redux_kotlin_android.util.StateObserver
 import com.carterhudson.redux_kotlin_android.util.notifyAll
@@ -19,21 +19,21 @@ import org.reduxkotlin.StoreSubscription
  * @param StateT the type of state emitted by the [Store]
  * @property store the [Store] instance itself
  */
-open class StoreSubscriptionManager<StateT : State>(private val store: Store<StateT>) :
+open class StoreSubscriptionManager<StateT : ReduxState>(private val store: Store<StateT>) :
   StateObservable<StateT>,
-  PostDispatchObservable<StateT> {
+  SideEffectObservable<StateT> {
 
   private var stateObservers = mutableSetOf<StateObserver<StateT, *>>()
 
-  private var postDispatchObservers = mutableSetOf<PostDispatchObserver<StateT>>()
+  private var sideEffectObservers = mutableSetOf<SideEffectObserver<StateT>>()
 
-  private val storeSubscription: StoreSubscription = store.subscribe {
+  private val storeStateSubscription: StoreSubscription = store.subscribe {
     store.getState().let(stateObservers::notifyAll)
   }
 
-  private val storePostDispatchSubscription =
-    store.safeCast<PostDispatchSubject<StateT>>()?.subscribe { state, action ->
-      postDispatchObservers.notifyAll(state, action)
+  private val storeSideEffectSubscription =
+    store.safeCast<SideEffectSubject<StateT>>()?.onSideEffect { state, action ->
+      sideEffectObservers.notifyAll(state, action)
     }
 
   val dispatch = store.dispatch
@@ -47,10 +47,10 @@ open class StoreSubscriptionManager<StateT : State>(private val store: Store<Sta
    * @param select function for [StateT] to [SlicedStateT]
    * @return a [ManagedSubscription]
    */
-  override fun <SlicedStateT : State> subscribe(
-    handleState: (SlicedStateT) -> Unit,
+  override fun <SlicedStateT : ReduxState> onStateChanged(
+    select: (StateT) -> SlicedStateT,
     distinct: Boolean,
-    select: (StateT) -> SlicedStateT
+    handleState: (SlicedStateT) -> Unit,
   ): ManagedSubscription = object : ManagedSubscription() {}.also { sub ->
     StateObserver(handleState, distinct, select, sub).also { obs ->
       stateObservers.add(obs)
@@ -60,23 +60,23 @@ open class StoreSubscriptionManager<StateT : State>(private val store: Store<Sta
   }
 
   /**
-   * Creates and adds a [PostDispatchObserver] to [postDispatchObservers]
+   * Creates and adds a [SideEffectObserver] to [sideEffectObservers]
    *
-   * @param postDispatchHandler function that handles state and action after dispatching has completed.
+   * @param sideEffectHandler function that handles state and action after dispatching has completed.
    * @return a [ManagedSubscription]
    */
-  override fun subscribe(postDispatchHandler: PostDispatchHandler<StateT>): ManagedSubscription =
+  override fun addSideEffectHandler(sideEffectHandler: SideEffectHandler<StateT>): ManagedSubscription =
     object : ManagedSubscription() {}.also {
-      postDispatchObservers.add(PostDispatchObserver(postDispatchHandler, it))
+      sideEffectObservers.add(SideEffectObserver(sideEffectHandler, it))
     }
 
   /**
    * Invoked in order to clear all subscriptions.
    */
   fun dispose() {
-    storeSubscription()
-    storePostDispatchSubscription?.invoke()
+    storeStateSubscription()
+    storeSideEffectSubscription?.invoke()
     stateObservers.clear()
-    postDispatchObservers.clear()
+    sideEffectObservers.clear()
   }
 }

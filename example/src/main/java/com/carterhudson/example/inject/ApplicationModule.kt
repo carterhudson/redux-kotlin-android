@@ -4,7 +4,7 @@ import com.carterhudson.example.AppState
 import com.carterhudson.example.feature.counter.counterStateReducer
 import com.carterhudson.example.feature.todo.toDoStateReducer
 import com.carterhudson.redux_kotlin_android.presentation.StoreSubscriptionManager
-import com.carterhudson.redux_kotlin_android.util.Action
+import com.carterhudson.redux_kotlin_android.util.ReduxAction
 import com.carterhudson.redux_kotlin_android.util.createStoreWithSideEffects
 import com.carterhudson.redux_kotlin_android.util.viewModelFactory
 import dagger.Module
@@ -20,7 +20,7 @@ class ApplicationModule {
 
   @Provides
   fun provideAppStateReducer(): Reducer<AppState> =
-    reducerForActionType<AppState, Action> { state, action ->
+    reducerForActionType<AppState, ReduxAction> { state, action ->
       state.copy(
         counterState = counterStateReducer(state.counterState, action),
         toDoState = toDoStateReducer(state.toDoState, action)

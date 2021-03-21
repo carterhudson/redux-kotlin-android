@@ -10,27 +10,27 @@ import org.reduxkotlin.Reducer
 import org.reduxkotlin.StoreSubscription
 import org.reduxkotlin.createStore
 
-interface Action
+interface ReduxAction
 
-interface State
+interface ReduxState
 
-fun <StateT : State> createStoreWithSideEffects(
+fun <StateT : ReduxState> createStoreWithSideEffects(
   reducer: Reducer<StateT>,
   initialState: StateT
 ) = createStore(reducer, initialState, allowSideEffects())
 
-interface Renderer<StateT : State> {
+interface Renderer<StateT : ReduxState> {
   fun render(state: StateT)
 }
 
-fun <StateT : State> Collection<StateObserver<StateT, *>>.notifyAll(next: StateT) =
+fun <StateT : ReduxState> Collection<StateObserver<StateT, *>>.notifyAll(next: StateT) =
   forEach {
     it.notify(next)
   }
 
-fun <StateT : State> Collection<PostDispatchObserver<StateT>>.notifyAll(
+fun <StateT : ReduxState> Collection<SideEffectObserver<StateT>>.notifyAll(
   state: StateT,
-  action: Any
+  action: ReduxAction
 ) = forEach {
   it.notify(state, action)
 }
@@ -44,20 +44,25 @@ fun Collection<ManagedSubscription>.cancel() = forEach(ManagedSubscription::canc
 fun MutableCollection<ManagedSubscription>.addAll(vararg subscriptions: ManagedSubscription) =
   addAll(subscriptions)
 
-typealias PostDispatchHandler<StateT> = (StateT, Any) -> Unit
+/**
+ * Handler for side-effects
+ */
+fun interface SideEffectHandler<StateT : ReduxState> {
+  fun onSideEffect(state: StateT, action: ReduxAction)
+}
 
 /**
  * Since the manager just proxies observation for the store, it's an observable
  */
-fun interface PostDispatchObservable<StateT : State> {
-  fun subscribe(postDispatchHandler: PostDispatchHandler<StateT>): ManagedSubscription
+fun interface SideEffectObservable<StateT : ReduxState> {
+  fun addSideEffectHandler(sideEffectHandler: SideEffectHandler<StateT>): ManagedSubscription
 }
 
 /**
  * Since the Store keeps state, it is a subject
  */
-fun interface PostDispatchSubject<StateT : State> {
-  fun subscribe(postDispatchHandler: PostDispatchHandler<StateT>): StoreSubscription
+fun interface SideEffectSubject<StateT : ReduxState> {
+  fun onSideEffect(sideEffectHandler: SideEffectHandler<StateT>): StoreSubscription
 }
 
 inline fun <reified ClassT> Any.cast() = this as ClassT
@@ -69,7 +74,7 @@ inline fun <reified ClassT> Any.safeCast() = this as? ClassT
  *
  * @param InStateT the original, non-transformed state
  */
-interface StateObservable<InStateT : State> {
+interface StateObservable<InStateT : ReduxState> {
 
   /**
    * Supports subscribing to slices of [InStateT]
@@ -80,10 +85,10 @@ interface StateObservable<InStateT : State> {
    * @param select a function that transforms [InStateT] to [OutStateT]
    * @return a [ManagedSubscription]
    */
-  fun <OutStateT : State> subscribe(
-    handleState: (state: OutStateT) -> Unit,
+  fun <OutStateT : ReduxState> onStateChanged(
+    select: (state: InStateT) -> OutStateT,
     distinct: Boolean = true,
-    select: (state: InStateT) -> OutStateT
+    handleState: (state: OutStateT) -> Unit,
   ): ManagedSubscription
 }
 
@@ -141,7 +146,7 @@ interface StateObservable<InStateT : State> {
 //    store = createStoreWithSideEffects(reducer, initialState)
 //    subscriptionManager = StoreSubscriptionManager(store)
 @Suppress("UNCHECKED_CAST")
-inline fun <reified StateT : State> viewModelFactory(subscriptionManager: StoreSubscriptionManager<StateT>): ViewModelProvider.Factory {
+inline fun <reified StateT : ReduxState> viewModelFactory(subscriptionManager: StoreSubscriptionManager<StateT>): ViewModelProvider.Factory {
   return object : ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
       return StoreViewModel(subscriptionManager) as T

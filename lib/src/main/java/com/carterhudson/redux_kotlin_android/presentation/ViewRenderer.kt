@@ -2,7 +2,7 @@ package com.carterhudson.redux_kotlin_android.presentation
 
 import android.view.View
 import com.carterhudson.redux_kotlin_android.util.Renderer
-import com.carterhudson.redux_kotlin_android.util.State
+import com.carterhudson.redux_kotlin_android.util.ReduxState
 
 /**
  * A class for managing UI.
@@ -12,7 +12,7 @@ import com.carterhudson.redux_kotlin_android.util.State
  *
  * @param StateT the state the [ViewRenderer] will [render]
  */
-abstract class ViewRenderer<StateT : State> : Renderer<StateT> {
+abstract class ViewRenderer<StateT : ReduxState> : Renderer<StateT> {
 
   abstract fun root() : View
 

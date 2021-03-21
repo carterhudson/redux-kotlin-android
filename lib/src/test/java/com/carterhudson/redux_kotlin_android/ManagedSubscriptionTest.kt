@@ -2,7 +2,7 @@ package com.carterhudson.redux_kotlin_android
 
 import com.carterhudson.redux_kotlin_android.util.ManagedSubscription
 import com.carterhudson.redux_kotlin_android.util.Renderer
-import com.carterhudson.redux_kotlin_android.util.State
+import com.carterhudson.redux_kotlin_android.util.ReduxState
 import com.carterhudson.redux_kotlin_android.util.StateObservable
 import com.carterhudson.redux_kotlin_android.util.StateObserver
 import com.carterhudson.redux_kotlin_android.util.notifyAll
@@ -13,24 +13,24 @@ import io.mockk.verify
 
 class ManagedSubscriptionTest : BehaviorSpec() {
   val renderer = spyk(
-      object : Renderer<State> {
-        override fun render(state: State) {
+      object : Renderer<ReduxState> {
+        override fun render(state: ReduxState) {
 
         }
       }
   )
 
-  val observers = mutableListOf<StateObserver<State, *>>()
+  val observers = mutableListOf<StateObserver<ReduxState, *>>()
 
-  val state = object : State {}
+  val state = object : ReduxState {}
 
   init {
     Given("a state observable") {
-      val stateObservable = object : StateObservable<State> {
-        override fun <OutStateT : State> subscribe(
+      val stateObservable = object : StateObservable<ReduxState> {
+        override fun <OutStateT : ReduxState> subscribe(
           handleState: (OutStateT) -> Unit,
           distinct: Boolean,
-          select: (State) -> OutStateT
+          select: (ReduxState) -> OutStateT
         ): ManagedSubscription = object : ManagedSubscription() {}.also {
           observers.add(
               StateObserver(renderer::render, false, select, it).also { obs ->

@@ -1,39 +1,45 @@
 package com.carterhudson.redux_kotlin_android.util.enhancer
 
-import com.carterhudson.redux_kotlin_android.util.PostDispatchHandler
-import com.carterhudson.redux_kotlin_android.util.PostDispatchSubject
-import com.carterhudson.redux_kotlin_android.util.State
+import com.carterhudson.redux_kotlin_android.util.ReduxAction
+import com.carterhudson.redux_kotlin_android.util.ReduxState
+import com.carterhudson.redux_kotlin_android.util.SideEffectHandler
+import com.carterhudson.redux_kotlin_android.util.SideEffectSubject
 import org.reduxkotlin.Dispatcher
 import org.reduxkotlin.Store
 import org.reduxkotlin.StoreEnhancer
 import org.reduxkotlin.StoreSubscription
 
-fun <StateT : State> allowSideEffects(): StoreEnhancer<StateT> = { storeCreator ->
+fun <StateT : ReduxState> allowSideEffects(): StoreEnhancer<StateT> = { storeCreator ->
   { reducer, initialState, enhancer ->
     storeCreator(reducer, initialState, enhancer).let { store ->
-      object : PostDispatchSubject<StateT>, Store<StateT> by store {
+      object : SideEffectSubject<StateT>, Store<StateT> by store {
 
-        private var currentPostDispatchHandlers: MutableSet<PostDispatchHandler<StateT>> =
+        private var currentSideEffectHandlers: MutableSet<SideEffectHandler<StateT>> =
           mutableSetOf()
 
-        private var safePostDispatchHandlers: MutableSet<PostDispatchHandler<StateT>> =
-          currentPostDispatchHandlers.toMutableSet()
+        private var safeSideEffectHandlers: MutableSet<SideEffectHandler<StateT>> =
+          currentSideEffectHandlers.toMutableSet()
 
         fun ensureSafeSideEffectHandlers() {
-          if (currentPostDispatchHandlers == safePostDispatchHandlers) {
-            safePostDispatchHandlers = currentPostDispatchHandlers.toMutableSet()
+          if (currentSideEffectHandlers == safeSideEffectHandlers) {
+            safeSideEffectHandlers = currentSideEffectHandlers.toMutableSet()
           }
         }
 
         var isIssuing = false
 
         override var dispatch: Dispatcher = { action ->
+          require(action is ReduxAction) {
+            """In order to minimize errors like forgetting to wrap objects in actions,
+              |kotlin-redux-android requires all dispatched actions to be of type ReduxAction.""".trimMargin()
+          }
+
           store.dispatch(action).also {
             isIssuing = true
-            currentPostDispatchHandlers = safePostDispatchHandlers
+            currentSideEffectHandlers = safeSideEffectHandlers
             try {
-              currentPostDispatchHandlers.forEach { handler ->
-                handler(store.state, action)
+              currentSideEffectHandlers.forEach { handler ->
+                handler.onSideEffect(store.state, action)
               }
             } finally {
               isIssuing = false
@@ -41,7 +47,7 @@ fun <StateT : State> allowSideEffects(): StoreEnhancer<StateT> = { storeCreator 
           }
         }
 
-        override fun subscribe(postDispatchHandler: PostDispatchHandler<StateT>): StoreSubscription {
+        override fun onSideEffect(sideEffectHandler: SideEffectHandler<StateT>): StoreSubscription {
           check(!isIssuing) {
             """Currently issuing actions to side-effect handlers. You may not add handlers
               |until the store is at rest.""".trimMargin()
@@ -49,7 +55,7 @@ fun <StateT : State> allowSideEffects(): StoreEnhancer<StateT> = { storeCreator 
 
           var isSubscribed = true
           ensureSafeSideEffectHandlers()
-          safePostDispatchHandlers.add(postDispatchHandler)
+          safeSideEffectHandlers.add(sideEffectHandler)
 
           return unsubscribeBlock@{
             if (!isSubscribed) {
@@ -63,7 +69,7 @@ fun <StateT : State> allowSideEffects(): StoreEnhancer<StateT> = { storeCreator 
 
             isSubscribed = false
             ensureSafeSideEffectHandlers()
-            safePostDispatchHandlers.remove(postDispatchHandler)
+            safeSideEffectHandlers.remove(sideEffectHandler)
           }
         }
       }
