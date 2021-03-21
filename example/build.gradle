@@ -1,50 +1,54 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
+apply plugin: 'dagger.hilt.android.plugin'
 
 android {
-  compileSdkVersion 30
+    compileSdkVersion 30
 
-  defaultConfig {
-    applicationId "com.carterhudson.example"
-    minSdkVersion 23
-    targetSdkVersion 30
-    versionCode 1
-    versionName "1.0"
+    defaultConfig {
+        applicationId "com.carterhudson.example"
+        minSdkVersion 23
+        targetSdkVersion 30
+        versionCode 1
+        versionName "1.0"
 
-    testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-  }
-
-  buildTypes {
-    release {
-      minifyEnabled false
-      proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
-  }
 
-  buildFeatures {
-    viewBinding true
-  }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
 
-  kotlinOptions {
-    jvmTarget = "1.8"
-  }
+    buildFeatures {
+        viewBinding true
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
 }
 
 dependencies {
-  implementation fileTree(dir: "libs", include: ["*.jar"])
-  implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-  implementation 'androidx.appcompat:appcompat:1.3.0-beta01'
-  implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
-  implementation project(path: ':lib')
-  testImplementation 'junit:junit:4.13.1'
-  androidTestImplementation 'androidx.test.ext:junit:1.1.2'
-  androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
-  api 'com.google.dagger:dagger:2.28.3'
-  kapt 'com.google.dagger:dagger-compiler:2.28.3'
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation 'androidx.appcompat:appcompat:1.3.0-beta01'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    implementation project(path: ':lib')
+    testImplementation 'junit:junit:4.13.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
-  //ktx
-  implementation "androidx.core:core-ktx:1.3.2"
-  implementation "androidx.activity:activity-ktx:1.3.0-alpha03"
-  implementation "androidx.fragment:fragment-ktx:1.3.0"
+    // Hilt
+    implementation "com.google.dagger:hilt-android:2.33-beta"
+    kapt "com.google.dagger:hilt-compiler:2.33-beta"
+
+    //ktx
+    implementation "androidx.core:core-ktx:1.3.2"
+    implementation "androidx.activity:activity-ktx:1.3.0-alpha04"
+    implementation "androidx.fragment:fragment-ktx:1.3.1"
+
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.3.0"
 }

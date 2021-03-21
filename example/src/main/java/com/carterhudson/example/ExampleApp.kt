@@ -1,15 +1,8 @@
 package com.carterhudson.example
 
 import android.app.Application
-import com.carterhudson.example.inject.ApplicationComponent
-import com.carterhudson.example.inject.ApplicationModule
-import com.carterhudson.example.inject.DaggerApplicationComponent
+import dagger.hilt.android.HiltAndroidApp
 
-class ExampleApp : Application() {
-  companion object {
-    val injector: ApplicationComponent = DaggerApplicationComponent.builder()
-        .applicationModule(ApplicationModule())
-        .build()
-  }
-}
+@HiltAndroidApp
+class ExampleApp : Application()
 

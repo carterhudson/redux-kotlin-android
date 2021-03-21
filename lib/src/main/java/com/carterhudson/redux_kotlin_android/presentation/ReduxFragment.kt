@@ -5,28 +5,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.carterhudson.redux_kotlin_android.util.ManagedSubscription
-import com.carterhudson.redux_kotlin_android.util.Renderer
 import com.carterhudson.redux_kotlin_android.util.ReduxState
-import com.carterhudson.redux_kotlin_android.util.addAll
-import com.carterhudson.redux_kotlin_android.util.cancel
+import com.carterhudson.redux_kotlin_android.util.Renderer
 import com.carterhudson.redux_kotlin_android.util.lifecycle.LifecycleAction
-import com.carterhudson.redux_kotlin_android.util.pause
-import com.carterhudson.redux_kotlin_android.util.resume
 import com.carterhudson.redux_kotlin_android.util.safeCast
 
 abstract class ReduxFragment<StateT : ReduxState, RenderStateT : ReduxState> : Fragment() {
 
-  private lateinit var viewModel: StoreViewModel<StateT>
+  private lateinit var storeViewModel: StoreViewModel<StateT>
   private var renderer: Renderer<RenderStateT>? = null
-  private var subscriptions = mutableListOf<ManagedSubscription>()
-
-  val dispatch by lazy { viewModel.dispatch }
+  val dispatcher: TypesafeDispatcher by lazy { storeViewModel.dispatcher }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    onCreateViewModel().also { viewModel = it }
-    onViewModelCreated(viewModel)
+    onCreateViewModel().also { storeViewModel = it }
+    onViewModelCreated(storeViewModel)
   }
 
   abstract fun onCreateViewModel(): StoreViewModel<StateT>
@@ -36,7 +29,7 @@ abstract class ReduxFragment<StateT : ReduxState, RenderStateT : ReduxState> : F
   /**
    * Overridden from [Fragment.onCreateView].
    * Assigns [renderer] reference.
-   * Dispatches [LifecycleAction.CreatingView].
+   * Dispatches [LifecycleAction.FragmentAction.CreatingView].
    *
    * @return the root view of the created [renderer]
    */
@@ -46,7 +39,7 @@ abstract class ReduxFragment<StateT : ReduxState, RenderStateT : ReduxState> : F
     savedInstanceState: Bundle?,
   ): View? = onCreateRenderer(inflater, container, savedInstanceState)
       .also { renderer = it }
-      .also { viewModel.dispatch(LifecycleAction.Creating(this)) }
+      .also { dispatcher.dispatch(LifecycleAction.FragmentAction.CreatingView(this)) }
       .also { onRendererCreated(renderer) }
       ?.safeCast<ViewRenderer<RenderStateT>>()
       ?.root()
@@ -71,68 +64,38 @@ abstract class ReduxFragment<StateT : ReduxState, RenderStateT : ReduxState> : F
   /**
    * Overridden from [Fragment.onViewCreated]
    * Handles subscribing to state & side effects
-   * Dispatches [LifecycleAction.ViewCreated]
+   * Dispatches [LifecycleAction.FragmentAction.ViewCreated]
    */
   override fun onViewCreated(
     view: View,
     savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
-
-    with(viewModel) {
-      subscriptions.addAll(
-        onStateChanged(::onSelectState, distinct()) {
-          renderer?.render(it)
-        },
-        addSideEffectHandler(::performSideEffect)
-      )
-    }
+    storeViewModel.dispatcher.dispatch(LifecycleAction.FragmentAction.ViewCreated(this))
   }
-
-  /**
-   * Delegate method (Optional).
-   * Override in order to change distinct vs indistinct render calls.
-   *
-   * @return boolean indicating distinct state rendering.
-   */
-  protected open fun distinct(): Boolean = true
-
-  /**
-   * Delegate method (Optional)
-   * Override in order to perform side effects.
-   *
-   * @param state
-   * @param action
-   */
-  protected open fun performSideEffect(state: StateT, action: Any) = Unit
-
-  abstract fun onSelectState(inState: StateT): RenderStateT
 
   override fun onStart() {
     super.onStart()
-    dispatch(LifecycleAction.Starting(this))
+    dispatcher.dispatch(LifecycleAction.Starting(this))
   }
 
   override fun onResume() {
     super.onResume()
-    subscriptions.resume()
-    dispatch(LifecycleAction.Resuming(this))
+    dispatcher.dispatch(LifecycleAction.Resuming(this))
   }
 
   override fun onPause() {
-    dispatch(LifecycleAction.Pausing(this))
-    subscriptions.pause()
+    dispatcher.dispatch(LifecycleAction.Pausing(this))
     super.onPause()
   }
 
   override fun onStop() {
-    dispatch(LifecycleAction.Stopping(this))
-    subscriptions.cancel()
+    dispatcher.dispatch(LifecycleAction.Stopping(this))
     super.onStop()
   }
 
   override fun onDestroy() {
-    dispatch(LifecycleAction.Destroying(this))
+    dispatcher.dispatch(LifecycleAction.Destroying(this))
     super.onDestroy()
   }
 }

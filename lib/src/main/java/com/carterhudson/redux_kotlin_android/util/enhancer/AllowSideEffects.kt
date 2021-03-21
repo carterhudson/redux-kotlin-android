@@ -39,7 +39,7 @@ fun <StateT : ReduxState> allowSideEffects(): StoreEnhancer<StateT> = { storeCre
             currentSideEffectHandlers = safeSideEffectHandlers
             try {
               currentSideEffectHandlers.forEach { handler ->
-                handler.onSideEffect(store.state, action)
+                handler.handle(store.state, action)
               }
             } finally {
               isIssuing = false

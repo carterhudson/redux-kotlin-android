@@ -14,4 +14,8 @@ sealed class LifecycleAction : ReduxAction, LifecycleOwnerReferenceHolder {
   class Starting(override val owner: LifecycleOwner) : LifecycleAction()
   class Stopping(override val owner: LifecycleOwner) : LifecycleAction()
   class Destroying(override val owner: LifecycleOwner) : LifecycleAction()
+  sealed class FragmentAction : LifecycleAction() {
+    class CreatingView(override val owner: LifecycleOwner) : FragmentAction()
+    class ViewCreated(override val owner: LifecycleOwner) : FragmentAction()
+  }
 }

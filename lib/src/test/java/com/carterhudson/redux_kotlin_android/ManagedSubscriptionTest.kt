@@ -1,13 +1,9 @@
 package com.carterhudson.redux_kotlin_android
 
-import com.carterhudson.redux_kotlin_android.util.ManagedSubscription
 import com.carterhudson.redux_kotlin_android.util.Renderer
 import com.carterhudson.redux_kotlin_android.util.ReduxState
 import com.carterhudson.redux_kotlin_android.util.StateObservable
-import com.carterhudson.redux_kotlin_android.util.StateObserver
-import com.carterhudson.redux_kotlin_android.util.notifyAll
 import io.kotest.core.spec.style.BehaviorSpec
-import io.kotest.matchers.shouldBe
 import io.mockk.spyk
 import io.mockk.verify
 

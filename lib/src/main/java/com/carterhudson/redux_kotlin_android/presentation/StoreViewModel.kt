@@ -1,29 +1,65 @@
 package com.carterhudson.redux_kotlin_android.presentation
 
 import androidx.lifecycle.ViewModel
-import com.carterhudson.redux_kotlin_android.util.SideEffectObservable
+import com.carterhudson.redux_kotlin_android.util.ReduxAction
 import com.carterhudson.redux_kotlin_android.util.ReduxState
-import com.carterhudson.redux_kotlin_android.util.StateObservable
+import com.carterhudson.redux_kotlin_android.util.SideEffectSubject
+import com.carterhudson.redux_kotlin_android.util.cast
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import org.reduxkotlin.Store
 
-/**
- * Holds a reference to a [subscriptionManager] to manage subscriptions
- * across lifecycle events.
- *
- * @param StateT
- * @property subscriptionManager
- */
-open class StoreViewModel<StateT : ReduxState>(private val subscriptionManager: StoreSubscriptionManager<StateT>) :
-  ViewModel(),
-  StateObservable<StateT> by subscriptionManager,
-  SideEffectObservable<StateT> by subscriptionManager {
+open class StoreViewModel<StateT : ReduxState>(
+  private val store: Store<StateT>,
+) : ViewModel() {
 
-  val dispatch = subscriptionManager.dispatch
+  private val _state = MutableStateFlow(store.getState())
+  val state = _state
 
-  /**
-   * A [ViewModel] lifecycle method signifying the end of the [subscriptionManager]'s lifetime.
-   */
+  private lateinit var _sideEffect: MutableStateFlow<SideEffect<StateT>>
+  lateinit var sideEffect: StateFlow<SideEffect<StateT>>
+    private set
+
+  private val stateSubscription = store.subscribe {
+    _state.value = store.getState()
+  }
+
+  data class SideEffect<StateT : ReduxState>(
+    val state: StateT,
+    val action: Any,
+  )
+
+  private val postDispatchSubscription = run {
+    require(store is SideEffectSubject<*>) {
+      """StoreViewModel requires the store to also be a SideEffectSubject. Please create
+        |your store with the provided method: createStoreWithSideEffects(reducer, state).
+      """.trimMargin()
+    }
+
+    store.cast<SideEffectSubject<StateT>>().onSideEffect { s, a ->
+
+      val sideEffect = SideEffect(s, a)
+
+      when {
+        // initialize on first dispatch complete
+        !::_sideEffect.isInitialized -> {
+          _sideEffect = MutableStateFlow(sideEffect)
+          this.sideEffect = _sideEffect
+        }
+        // emit on the rest
+        else -> _sideEffect.value = sideEffect
+      }
+    }
+  }
+
+  val dispatcher: TypesafeDispatcher = TypesafeDispatcher { action: ReduxAction ->
+    store.dispatch(action)
+  }
+
   override fun onCleared() {
     super.onCleared()
-    subscriptionManager.dispose()
+    stateSubscription()
+    postDispatchSubscription()
   }
 }
+
