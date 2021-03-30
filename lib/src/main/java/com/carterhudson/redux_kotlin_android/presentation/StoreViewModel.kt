@@ -31,12 +31,12 @@ open class StoreViewModel<StateT : ReduxState>(
 
   private val postDispatchSubscription = run {
     require(store is SideEffectSubject<*>) {
-      """StoreViewModel requires the store to also be a SideEffectSubject. Please create
-        |your store with the provided method: createStoreWithSideEffects(reducer, state).
+      """StoreViewModel requires the store to also be a SideEffectSubject.
+        |Please use the allowSideEffects() store enhancer.
       """.trimMargin()
     }
 
-    store.cast<SideEffectSubject<StateT>>().onSideEffect { s, a ->
+    store.cast<SideEffectSubject<StateT>>().subscribeSideEffectHandler { s, a ->
 
       val sideEffect = SideEffect(s, a)
 

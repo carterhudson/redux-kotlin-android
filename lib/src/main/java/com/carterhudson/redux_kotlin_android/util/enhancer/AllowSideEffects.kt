@@ -26,7 +26,7 @@ fun <StateT : ReduxState> allowSideEffects(): StoreEnhancer<StateT> = { storeCre
           }
         }
 
-        var isIssuing = false
+        var isIssuingSideEffects = false
 
         override var dispatch: Dispatcher = { action ->
           require(action is ReduxAction) {
@@ -35,20 +35,20 @@ fun <StateT : ReduxState> allowSideEffects(): StoreEnhancer<StateT> = { storeCre
           }
 
           store.dispatch(action).also {
-            isIssuing = true
+            isIssuingSideEffects = true
             currentSideEffectHandlers = safeSideEffectHandlers
             try {
               currentSideEffectHandlers.forEach { handler ->
                 handler.handle(store.state, action)
               }
             } finally {
-              isIssuing = false
+              isIssuingSideEffects = false
             }
           }
         }
 
-        override fun onSideEffect(sideEffectHandler: SideEffectHandler<StateT>): StoreSubscription {
-          check(!isIssuing) {
+        override fun subscribeSideEffectHandler(sideEffectHandler: SideEffectHandler<StateT>): StoreSubscription {
+          check(!isIssuingSideEffects) {
             """Currently issuing actions to side-effect handlers. You may not add handlers
               |until the store is at rest.""".trimMargin()
           }
@@ -62,7 +62,7 @@ fun <StateT : ReduxState> allowSideEffects(): StoreEnhancer<StateT> = { storeCre
               return@unsubscribeBlock
             }
 
-            check(!isIssuing) {
+            check(!isIssuingSideEffects) {
               """Currently issuing actions to side-effect handlers. You may not remove handlers
                 |until the store is at rest.""".trimMargin()
             }
