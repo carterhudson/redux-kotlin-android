@@ -5,17 +5,17 @@ import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.carterhudson.example.feature.counter.CounterState
 import com.carterhudson.example.feature.counter.CounterViewRenderer
-import com.carterhudson.redux_kotlin_android.presentation.ReduxActivity
+import com.carterhudson.redux_kotlin_android.presentation.ReduxCompatActivity
 import com.carterhudson.redux_kotlin_android.presentation.StoreViewModel
 import com.carterhudson.redux_kotlin_android.presentation.ViewRenderer
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
-class MainActivity : ReduxActivity<AppState, CounterState>() {
+class MainActivity : ReduxCompatActivity<AppState, CounterState>() {
   init {
     lifecycleScope.launchWhenResumed {
-      storeViewModel.state.collect {
+      storeViewModel.stateFlow.collect {
         renderer?.render(it.counterState)
       }
     }
@@ -23,12 +23,12 @@ class MainActivity : ReduxActivity<AppState, CounterState>() {
     lifecycleScope.launchWhenResumed {
       storeViewModel.sideEffect.collect {
         Toast
-            .makeText(
-              this@MainActivity,
-              "Side effect triggered for ${it.action}!",
-              Toast.LENGTH_SHORT
-            )
-            .show()
+          .makeText(
+            this@MainActivity,
+            "Side effect triggered for ${it.action}!",
+            Toast.LENGTH_SHORT
+          )
+          .show()
       }
     }
   }

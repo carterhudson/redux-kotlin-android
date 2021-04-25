@@ -16,6 +16,7 @@ import org.reduxkotlin.reducerForActionType
 @Module
 @InstallIn(SingletonComponent::class)
 class ApplicationModule {
+
   @Provides
   fun provideAppState() = AppState()
 

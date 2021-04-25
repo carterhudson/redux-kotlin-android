@@ -14,14 +14,14 @@ open class StoreViewModel<StateT : ReduxState>(
 ) : ViewModel() {
 
   private val _state = MutableStateFlow(store.getState())
-  val state = _state
+  val stateFlow = _state
 
   private lateinit var _sideEffect: MutableStateFlow<SideEffect<StateT>>
   lateinit var sideEffect: StateFlow<SideEffect<StateT>>
     private set
 
   private val stateSubscription = store.subscribe {
-    _state.value = store.getState()
+    _state.setValue(store.getState())
   }
 
   data class SideEffect<StateT : ReduxState>(
@@ -47,7 +47,7 @@ open class StoreViewModel<StateT : ReduxState>(
           this.sideEffect = _sideEffect
         }
         // emit on the rest
-        else -> _sideEffect.value = sideEffect
+        else -> _sideEffect.setValue(sideEffect)
       }
     }
   }
