@@ -76,26 +76,26 @@ abstract class ReduxFragment<StateT : ReduxState, RenderStateT : ReduxState> : F
 
   override fun onStart() {
     super.onStart()
-    dispatcher.dispatch(LifecycleAction.Starting(this))
+    dispatcher.dispatch(LifecycleAction.Started(this))
   }
 
   override fun onResume() {
     super.onResume()
-    dispatcher.dispatch(LifecycleAction.Resuming(this))
+    dispatcher.dispatch(LifecycleAction.Resumed(this))
   }
 
   override fun onPause() {
-    dispatcher.dispatch(LifecycleAction.Pausing(this))
+    dispatcher.dispatch(LifecycleAction.Paused(this))
     super.onPause()
   }
 
   override fun onStop() {
-    dispatcher.dispatch(LifecycleAction.Stopping(this))
+    dispatcher.dispatch(LifecycleAction.Stopped(this))
     super.onStop()
   }
 
   override fun onDestroy() {
-    dispatcher.dispatch(LifecycleAction.Destroying(this))
+    dispatcher.dispatch(LifecycleAction.Destroyed(this))
     super.onDestroy()
   }
 }

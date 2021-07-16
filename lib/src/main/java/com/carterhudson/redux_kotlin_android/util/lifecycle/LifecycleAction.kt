@@ -8,12 +8,12 @@ interface LifecycleOwnerReferenceHolder {
 }
 
 sealed class LifecycleAction : ReduxAction, LifecycleOwnerReferenceHolder {
-  class Creating(override val owner: LifecycleOwner) : LifecycleAction()
-  class Pausing(override val owner: LifecycleOwner) : LifecycleAction()
-  class Resuming(override val owner: LifecycleOwner) : LifecycleAction()
-  class Starting(override val owner: LifecycleOwner) : LifecycleAction()
-  class Stopping(override val owner: LifecycleOwner) : LifecycleAction()
-  class Destroying(override val owner: LifecycleOwner) : LifecycleAction()
+  class Created(override val owner: LifecycleOwner) : LifecycleAction()
+  class Started(override val owner: LifecycleOwner) : LifecycleAction()
+  class Resumed(override val owner: LifecycleOwner) : LifecycleAction()
+  class Paused(override val owner: LifecycleOwner) : LifecycleAction()
+  class Stopped(override val owner: LifecycleOwner) : LifecycleAction()
+  class Destroyed(override val owner: LifecycleOwner) : LifecycleAction()
   sealed class FragmentAction : LifecycleAction() {
     class CreatingView(override val owner: LifecycleOwner) : FragmentAction()
     class ViewCreated(override val owner: LifecycleOwner) : FragmentAction()

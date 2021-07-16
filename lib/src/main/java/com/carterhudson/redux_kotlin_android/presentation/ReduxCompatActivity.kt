@@ -5,10 +5,10 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.carterhudson.redux_kotlin_android.util.ReduxState
 import com.carterhudson.redux_kotlin_android.util.Renderer
-import com.carterhudson.redux_kotlin_android.util.lifecycle.LifecycleAction
 import com.carterhudson.redux_kotlin_android.util.safeCast
 
-abstract class ReduxCompatActivity<StateT : ReduxState, RenderStateT : ReduxState> : ReduxActivity<StateT, RenderStateT>() {
+abstract class ReduxCompatActivity<StateT : ReduxState, RenderStateT : ReduxState> :
+  AppCompatActivity() {
 
   protected val renderer: Renderer<RenderStateT>? by lazy { onCreateRenderer() }
 
@@ -53,29 +53,4 @@ abstract class ReduxCompatActivity<StateT : ReduxState, RenderStateT : ReduxStat
   }
 
   protected abstract fun setViewModelInternal(): StoreViewModel<StateT>
-
-  override fun onStart() {
-    super.onStart()
-    dispatcher.dispatch(LifecycleAction.Starting(this))
-  }
-
-  override fun onResume() {
-    super.onResume()
-    dispatcher.dispatch(LifecycleAction.Resuming(this))
-  }
-
-  override fun onPause() {
-    dispatcher.dispatch(LifecycleAction.Pausing(this))
-    super.onPause()
-  }
-
-  override fun onStop() {
-    dispatcher.dispatch(LifecycleAction.Stopping(this))
-    super.onStop()
-  }
-
-  override fun onDestroy() {
-    dispatcher.dispatch(LifecycleAction.Destroying(this))
-    super.onDestroy()
-  }
 }

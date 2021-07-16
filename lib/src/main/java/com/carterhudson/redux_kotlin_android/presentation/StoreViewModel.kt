@@ -21,7 +21,7 @@ open class StoreViewModel<StateT : ReduxState>(
     private set
 
   private val stateSubscription = store.subscribe {
-    _state.setValue(store.getState())
+    _state.value = store.getState()
   }
 
   data class SideEffect<StateT : ReduxState>(
@@ -47,7 +47,7 @@ open class StoreViewModel<StateT : ReduxState>(
           this.sideEffect = _sideEffect
         }
         // emit on the rest
-        else -> _sideEffect.setValue(sideEffect)
+        else -> _sideEffect.value = sideEffect
       }
     }
   }

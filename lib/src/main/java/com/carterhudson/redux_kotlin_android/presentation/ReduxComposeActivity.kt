@@ -1,6 +1,15 @@
 package com.carterhudson.redux_kotlin_android.presentation
 
+import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.lifecycle.Lifecycle.Event.ON_CREATE
+import androidx.lifecycle.Lifecycle.Event.ON_DESTROY
+import androidx.lifecycle.Lifecycle.Event.ON_PAUSE
+import androidx.lifecycle.Lifecycle.Event.ON_RESUME
+import androidx.lifecycle.Lifecycle.Event.ON_START
+import androidx.lifecycle.Lifecycle.Event.ON_STOP
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
 import com.carterhudson.redux_kotlin_android.util.ReduxState
 import com.carterhudson.redux_kotlin_android.util.lifecycle.LifecycleAction
 
@@ -10,28 +19,40 @@ abstract class ReduxComposeActivity<StateT : ReduxState, ViewModelT : StoreViewM
 
   protected val dispatcher: TypesafeDispatcher by lazy { storeViewModel.dispatcher }
 
-  override fun onStart() {
-    super.onStart()
-    dispatcher.dispatch(LifecycleAction.Starting(this))
+  protected val lifecycleStateEmitter = object : LifecycleObserver {
+    @OnLifecycleEvent(ON_CREATE)
+    fun created() {
+      dispatcher.dispatch(LifecycleAction.Created(this@ReduxComposeActivity))
+    }
+
+    @OnLifecycleEvent(ON_START)
+    fun started() {
+      dispatcher.dispatch(LifecycleAction.Started(this@ReduxComposeActivity))
+    }
+
+    @OnLifecycleEvent(ON_RESUME)
+    fun resumed() {
+      dispatcher.dispatch(LifecycleAction.Resumed(this@ReduxComposeActivity))
+    }
+
+    @OnLifecycleEvent(ON_PAUSE)
+    fun paused() {
+      dispatcher.dispatch(LifecycleAction.Paused(this@ReduxComposeActivity))
+    }
+
+    @OnLifecycleEvent(ON_STOP)
+    fun stopped() {
+      dispatcher.dispatch(LifecycleAction.Stopped(this@ReduxComposeActivity))
+    }
+
+    @OnLifecycleEvent(ON_DESTROY)
+    fun destroyed() {
+      dispatcher.dispatch(LifecycleAction.Destroyed(this@ReduxComposeActivity))
+    }
   }
 
-  override fun onResume() {
-    super.onResume()
-    dispatcher.dispatch(LifecycleAction.Resuming(this))
-  }
-
-  override fun onPause() {
-    dispatcher.dispatch(LifecycleAction.Pausing(this))
-    super.onPause()
-  }
-
-  override fun onStop() {
-    dispatcher.dispatch(LifecycleAction.Stopping(this))
-    super.onStop()
-  }
-
-  override fun onDestroy() {
-    dispatcher.dispatch(LifecycleAction.Destroying(this))
-    super.onDestroy()
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    lifecycle.addObserver(lifecycleStateEmitter)
   }
 }
