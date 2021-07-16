@@ -19,7 +19,7 @@ abstract class ReduxComposeActivity<StateT : ReduxState, ViewModelT : StoreViewM
 
   protected val dispatcher: TypesafeDispatcher by lazy { storeViewModel.dispatcher }
 
-  protected val lifecycleStateEmitter = object : LifecycleObserver {
+  private val lifecycleStateEmitter = object : LifecycleObserver {
     @OnLifecycleEvent(ON_CREATE)
     fun created() {
       dispatcher.dispatch(LifecycleAction.Created(this@ReduxComposeActivity))
